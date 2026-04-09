@@ -178,3 +178,6 @@ export default function App(){
   if(!area) return <Login onLogin={setArea} dataDate={appData.dataDate}/>;
   return <Dash area={area} onLogout={()=>setArea(null)} rawData={appData.raw} dataDate={appData.dataDate} mtdLabel={appData.mtdLabel}/>;
 }
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
