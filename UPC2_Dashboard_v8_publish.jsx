@@ -3,31 +3,6 @@
 const PINS = { PU4:"4401", PU5:"5502", PU6:"6603", DU3:"3304", DU4:"4405", MGR:"9999" };
 
 
-const APR_TGT = {
-  PU4:{ESPOGEN:1351000,EPOTIV:374500,EUVAX:39165,ZEMIGLO:461250,ZEMIMET:4875,ZEMIDAPA:48000},
-  PU5:{ESPOGEN:2394000,EPOTIV:1523900,EUVAX:38024,ZEMIGLO:354000,ZEMIMET:5250,ZEMIDAPA:32000},
-  PU6:{ESPOGEN:1183000,EPOTIV:339500,EUVAX:16956.38,ZEMIGLO:253500,ZEMIMET:4875,ZEMIDAPA:20000},
-  DU3:{ZEMIGLO:2096250,ZEMIMET:71250,ZEMIDAPA:60000},
-  DU4:{ZEMIGLO:1845000,ZEMIMET:26250,ZEMIDAPA:60000},
-};
-const SCHEME_DEF = {
-  // Apr: EPO=ESPOGEN+EPOTIV, ZEMI=ZEMIGLO+ZEMIMET+ZEMIDAPA
-  PU4:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:1725500},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:514125},{name:"TOTAL",brands:null,tgt:2278790}],
-  PU5:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:3917900},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:391250},{name:"TOTAL",brands:null,tgt:4347174}],
-  PU6:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:1522500},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:278375},{name:"TOTAL",brands:null,tgt:1817831.38}],
-  DU3:[{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:2227500},{name:"Zemidapa",brands:["ZEMIDAPA"],tgt:60000}],
-  DU4:[{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:1931250},{name:"Zemidapa",brands:["ZEMIDAPA"],tgt:60000}],
-  MGR:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:7165900},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:5342500},{name:"TOTAL",brands:null,tgt:12602545.38}],
-};
-const Q2_SCHEME = {
-  // Q2 = Apr+May+Jun targets; ZEMI Family = ZEMIGLO+ZEMIMET+ZEMIDAPA; janFebAct=0 (Apr is Q2 month 1)
-  PU4:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:6162500,janFebAct:0},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:1733750,janFebAct:0},{name:"TOTAL",brands:null,tgt:8036125,janFebAct:0}],
-  PU5:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:13992500,janFebAct:0},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:1317500,janFebAct:0},{name:"TOTAL",brands:null,tgt:15445800,janFebAct:0}],
-  PU6:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:5437500,janFebAct:0},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:936250,janFebAct:0},{name:"TOTAL",brands:null,tgt:6434308.50,janFebAct:0}],
-  DU3:[{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:7450000,janFebAct:0},{name:"Zemidapa",brands:["ZEMIDAPA"],tgt:225000,janFebAct:0}],
-  DU4:[{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:6462500,janFebAct:0},{name:"Zemidapa",brands:["ZEMIDAPA"],tgt:225000,janFebAct:0}],
-  MGR:[{name:"EPO Family",brands:["ESPOGEN","EPOTIV"],tgt:25592500,janFebAct:0},{name:"ZEMI Family",brands:["ZEMIGLO","ZEMIMET","ZEMIDAPA"],tgt:17900000,janFebAct:0},{name:"TOTAL",brands:null,tgt:43828733.50,janFebAct:0}],
-};
 
 const BC={ESPOGEN:"#3b82f6",EPOTIV:"#8b5cf6",EUVAX:"#10b981",ZEMIGLO:"#ef4444",ZEMIMET:"#f97316",ZEMIDAPA:"#ec4899"};
 const fmt=n=>Math.round(n).toLocaleString("th-TH");
@@ -37,8 +12,8 @@ const pctCol=p=>p>=100?"#059669":p>=80?"#0ea5e9":p>=60?"#f59e0b":p>=40?"#f97316"
 function Gauge({pct,size=140}){const r=size*.35,cx=size/2,cy=size*.45,sw=size*.065;const cl=Math.min(pct,130),ang=(cl/130)*180;const sa=Math.PI,ea=sa-(ang*Math.PI/180);const x1=cx+r*Math.cos(sa),y1=cy-r*Math.sin(sa);const x2=cx+r*Math.cos(ea),y2=cy-r*Math.sin(ea);const col=pctCol(pct);return(<svg width={size} height={size*.52} viewBox={`0 0 ${size} ${size*.52}`} style={{display:"block",margin:"0 auto"}}><path d={`M${cx-r} ${cy} A${r} ${r} 0 0 1 ${cx+r} ${cy}`} fill="none" stroke="#f1f5f9" strokeWidth={sw} strokeLinecap="round"/>{cl>0&&<path d={`M${x1} ${y1} A${r} ${r} 0 ${ang>180?1:0} 1 ${x2} ${y2}`} fill="none" stroke={col} strokeWidth={sw} strokeLinecap="round"/>}<text x={cx} y={cy-2} textAnchor="middle" style={{fontSize:size*.2,fontWeight:800,fill:col}}>{pct.toFixed(0)}%</text></svg>);}
 function Mini({pct,size=80}){const r=size*.35,cx=size/2,cy=size*.45,sw=size*.07;const cl=Math.min(pct,130),ang=(cl/130)*180;const sa=Math.PI,ea=sa-(ang*Math.PI/180);const x1=cx+r*Math.cos(sa),y1=cy-r*Math.sin(sa);const x2=cx+r*Math.cos(ea),y2=cy-r*Math.sin(ea);const col=pctCol(pct);return(<svg width={size} height={size*.52} viewBox={`0 0 ${size} ${size*.52}`} style={{display:"block",margin:"0 auto"}}><path d={`M${cx-r} ${cy} A${r} ${r} 0 0 1 ${cx+r} ${cy}`} fill="none" stroke="#f1f5f9" strokeWidth={sw} strokeLinecap="round"/>{cl>0&&<path d={`M${x1} ${y1} A${r} ${r} 0 ${ang>180?1:0} 1 ${x2} ${y2}`} fill="none" stroke={col} strokeWidth={sw} strokeLinecap="round"/>}<text x={cx} y={cy-1} textAnchor="middle" style={{fontSize:size*.19,fontWeight:800,fill:col}}>{pct.toFixed(0)}%</text></svg>);}
 function Bar({pct,color,h=6}){return <div style={{background:"#f1f5f9",borderRadius:h/2,height:h,overflow:"hidden"}}><div style={{width:`${Math.min(pct,100)}%`,height:"100%",background:color,borderRadius:h/2}}/></div>;}
-function calcScheme(area,rawData){const defs=SCHEME_DEF[area]||[];const areaData=rawData.filter(r=>r.a===area);const total=areaData.reduce((s,r)=>s+r.v,0);return defs.map(s=>{let act=0;if(s.brands){areaData.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=total;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});}
-function calcQ2Scheme(area,rawData){const defs=Q2_SCHEME[area]||[];const areaData=rawData.filter(r=>r.a===area);const total=areaData.reduce((s,r)=>s+r.v,0);return defs.map(s=>{let marAct=0;if(s.brands){areaData.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=total;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});}
+function calcScheme(area,rawData,schemeDef){const defs=schemeDef[area]||[];const areaData=rawData.filter(r=>r.a===area);const total=areaData.reduce((s,r)=>s+r.v,0);return defs.map(s=>{let act=0;if(s.brands){areaData.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=total;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});}
+function calcQ2Scheme(area,rawData,q2Scheme){const defs=q2Scheme[area]||[];const areaData=rawData.filter(r=>r.a===area);const total=areaData.reduce((s,r)=>s+r.v,0);return defs.map(s=>{let marAct=0;if(s.brands){areaData.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=total;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});}
 
 function Login({onLogin,dataDate}){
   const [area,setArea]=useState(null);const [pin,setPin]=useState("");const [err,setErr]=useState("");const [shake,setShake]=useState(false);
@@ -71,7 +46,7 @@ function Login({onLogin,dataDate}){
   );
 }
 
-function Dash({area,onLogout,rawData,dataDate,mtdLabel}){
+function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,q2Scheme}){
   const isMgr=area==="MGR";
   const filterAreas=isMgr?["PU4","PU5","PU6","DU3","DU4"]:[area];
   const data=useMemo(()=>(rawData||[]).filter(r=>filterAreas.includes(r.a)),[area,rawData]);
@@ -81,15 +56,15 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel}){
   const activeBrand=selBrand&&brands.includes(selBrand)?selBrand:brands[0]||null;
   const brandSum=useMemo(()=>{const m={};data.forEach(r=>{if(!m[r.b])m[r.b]={b:r.b,v:0};m[r.b].v+=r.v;});return Object.values(m).sort((a,b)=>b.v-a.v);},[data]);
   const totalMTD=brandSum.reduce((s,b)=>s+b.v,0);
-  const targets=useMemo(()=>{if(isMgr){const m={};Object.values(APR_TGT).forEach(at=>{Object.entries(at).forEach(([b,t])=>{m[b]=(m[b]||0)+t;});});return m;}return APR_TGT[area]||{};},[area,isMgr]);
+  const targets=useMemo(()=>{if(isMgr){const m={};Object.values(tgt).forEach(at=>{Object.entries(at).forEach(([b,t])=>{m[b]=(m[b]||0)+t;});});return m;}return tgt[area]||{};},[area,isMgr]);
   const totalTarget=Object.values(targets).reduce((s,t)=>s+t,0);
   const totalPct=totalTarget>0?(totalMTD/totalTarget)*100:0;
   const custByBrand=useMemo(()=>{if(!activeBrand)return[];const filtered=data.filter(r=>r.b===activeBrand);const m={};filtered.forEach(r=>{const key=isMgr?`${r.a}|${r.c}`:r.c;if(!m[key])m[key]={customer:r.c,area:r.a,amount:0,qty:0,dates:[]};m[key].amount+=r.v;m[key].qty+=r.q;if(!m[key].dates.includes(r.d))m[key].dates.push(r.d);});let list=Object.values(m).sort((a,b)=>b.amount-a.amount);if(search.trim()){const q=search.trim().toLowerCase();list=list.filter(c=>c.customer.toLowerCase().includes(q));}return list;},[data,activeBrand,isMgr,search]);
   const brandMTD=brandSum.find(b=>b.b===activeBrand)?.v||0;
   const brandTgt=targets[activeBrand]||0;
-  const schemes=useMemo(()=>{const defs=SCHEME_DEF[isMgr?"MGR":area]||[];return defs.map(s=>{let act=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=totalMTD;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
-  const q1Schemes=useMemo(()=>{const defs=Q2_SCHEME[isMgr?"MGR":area]||[];return defs.map(s=>{let marAct=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=totalMTD;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
-  const areaBreak=useMemo(()=>{if(!isMgr)return null;return["PU4","PU5","PU6","DU3","DU4"].map(a=>{const act=(rawData||[]).filter(r=>r.a===a).reduce((s,r)=>s+r.v,0);const tgt=Object.values(APR_TGT[a]||{}).reduce((s,t)=>s+t,0);return{area:a,act,tgt,pct:tgt>0?(act/tgt)*100:0};});},[isMgr]);
+  const schemes=useMemo(()=>{const defs=schemeDef[isMgr?"MGR":area]||[];return defs.map(s=>{let act=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=totalMTD;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
+  const q1Schemes=useMemo(()=>{const defs=q2Scheme[isMgr?"MGR":area]||[];return defs.map(s=>{let marAct=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=totalMTD;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
+  const areaBreak=useMemo(()=>{if(!isMgr)return null;return["PU4","PU5","PU6","DU3","DU4"].map(a=>{const act=(rawData||[]).filter(r=>r.a===a).reduce((s,r)=>s+r.v,0);const tgt=Object.values(tgt[a]||{}).reduce((s,t)=>s+t,0);return{area:a,act,tgt,pct:tgt>0?(act/tgt)*100:0};});},[isMgr]);
 
   const downloadCSV=useCallback(()=>{let csv="\uFEFFวันที่,Area,ลูกค้า,แบรนด์,จำนวน,ยอดขาย\n";data.forEach(r=>csv+=`${r.d},${r.a},"${r.c}",${r.b},${r.q},${r.v}\n`);const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`SD0002_${area}_MTD.csv`;a.click();URL.revokeObjectURL(url);},[data,area]);
 
@@ -124,7 +99,7 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel}){
           {q1Schemes.map((s,i)=>(<div key={i} style={{background:"#faf5ff",borderRadius:12,padding:10,textAlign:"center",border:"1px solid #ede9fe"}}><div style={{fontSize:10,fontWeight:700,color:"#7c3aed",marginBottom:2,lineHeight:1.2}}>{s.name}</div><Mini pct={s.pct} size={78}/><div style={{fontSize:11,fontWeight:700,color:"#1e293b"}}>฿{fmtK(s.act)}</div><div style={{fontSize:9,color:"#94a3b8"}}>เป้า Q2 ฿{fmtK(s.tgt)}</div><div style={{fontSize:8,color:"#a78bfa",marginTop:2}}>เม.ย. ฿{fmtK(s.marAct)}</div></div>))}</div></div>)}
 
       {isMgr&&areaBreak&&(<div style={card}><div style={sec}>📍 แยกตาม Area — กดเพื่อดู Scheme</div>
-        {areaBreak.map((a,i)=>{const col=pctCol(a.pct);const isOpen=expandArea===a.area;const areaSchemes=isOpen?calcScheme(a.area,rawData||[]):[];const areaQ1=isOpen?calcQ2Scheme(a.area,rawData||[]):[];
+        {areaBreak.map((a,i)=>{const col=pctCol(a.pct);const isOpen=expandArea===a.area;const areaSchemes=isOpen?calcScheme(a.area,rawData||[],schemeDef):[];const areaQ1=isOpen?calcQ2Scheme(a.area,rawData||[],q2Scheme):[];
           return(<div key={i}><div onClick={()=>setExpandArea(isOpen?null:a.area)} style={{padding:"10px 0",borderBottom:!isOpen&&i<4?"1px solid #f8fafc":"none",cursor:"pointer"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:12,transition:"transform .2s",transform:isOpen?"rotate(90deg)":"rotate(0)",display:"inline-block"}}>▸</span><span style={{fontSize:14,fontWeight:700,color:"#1e293b"}}>{a.area}</span></div><div style={{textAlign:"right"}}><span style={{fontSize:14,fontWeight:800,color:col}}>{a.pct.toFixed(1)}%</span><span style={{fontSize:10,color:"#94a3b8",marginLeft:6}}>฿{fmtK(a.act)}</span></div></div><Bar pct={a.pct} color={col} h={7}/><div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#94a3b8",marginTop:3}}><span>Actual ฿{fmtK(a.act)}</span><span>Target ฿{fmtK(a.tgt)}</span></div></div>
             {isOpen&&(<div style={{background:"#f8fafc",borderRadius:12,padding:12,margin:"4px 0 4px",borderLeft:"3px solid "+col}}><div style={{fontSize:11,fontWeight:700,color:"#64748b",marginBottom:8}}>เม.ย. Scheme — {a.area}</div>{areaSchemes.map((s,j)=>{const sc=pctCol(s.pct);return(<div key={j} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 0",borderBottom:j<areaSchemes.length-1?"1px solid #e9ecf0":"none"}}><div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"#374151"}}>{s.name}</div><div style={{fontSize:10,color:"#94a3b8"}}>฿{fmtK(s.act)} / ฿{fmtK(s.tgt)}</div></div><div style={{width:50,textAlign:"right",fontSize:14,fontWeight:800,color:sc}}>{s.pct.toFixed(0)}%</div></div>);})}</div>)}
             {isOpen&&areaQ1.length>0&&(<div style={{background:"#faf5ff",borderRadius:12,padding:12,margin:"4px 0 12px",borderLeft:"3px solid #8b5cf6"}}><div style={{fontSize:11,fontWeight:700,color:"#7c3aed",marginBottom:8}}>Q2 Scheme — {a.area}</div>{areaQ1.map((s,j)=>{const sc=pctCol(s.pct);return(<div key={j} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 0",borderBottom:j<areaQ1.length-1?"1px solid #ede9fe":"none"}}><div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"#374151"}}>{s.name}</div><div style={{fontSize:10,color:"#94a3b8"}}>฿{fmtK(s.act)} / ฿{fmtK(s.tgt)}</div></div><div style={{width:50,textAlign:"right",fontSize:14,fontWeight:800,color:sc}}>{s.pct.toFixed(0)}%</div></div>);})}</div>)}
@@ -176,7 +151,7 @@ function App(){
     </div>);
 
   if(!area) return <Login onLogin={setArea} dataDate={appData.dataDate}/>;
-  return <Dash area={area} onLogout={()=>setArea(null)} rawData={appData.raw} dataDate={appData.dataDate} mtdLabel={appData.mtdLabel}/>;
+  return <Dash area={area} onLogout={()=>setArea(null)} rawData={appData.raw} dataDate={appData.dataDate} mtdLabel={appData.mtdLabel} tgt={appData.tgt} schemeDef={appData.schemeDef} q2Scheme={appData.q2Scheme}/>;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

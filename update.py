@@ -204,7 +204,7 @@ def main():
         "dataDate":  data_date,
         "mtdLabel":  mtd_label,
         "raw":       entries,
-        "aprTgt":    tgt,
+        "tgt":       tgt,
         "schemeDef": scheme_def,
         "q2Scheme":  q2_scheme,
     }
