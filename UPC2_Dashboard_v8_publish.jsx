@@ -64,7 +64,7 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,q2Scheme}){
   const brandTgt=targets[activeBrand]||0;
   const schemes=useMemo(()=>{const defs=schemeDef[isMgr?"MGR":area]||[];return defs.map(s=>{let act=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=totalMTD;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
   const q1Schemes=useMemo(()=>{const defs=q2Scheme[isMgr?"MGR":area]||[];return defs.map(s=>{let marAct=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=totalMTD;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});},[area,data,totalMTD,isMgr]);
-  const areaBreak=useMemo(()=>{if(!isMgr)return null;return["PU4","PU5","PU6","DU3","DU4"].map(a=>{const act=(rawData||[]).filter(r=>r.a===a).reduce((s,r)=>s+r.v,0);const tgt=Object.values(tgt[a]||{}).reduce((s,t)=>s+t,0);return{area:a,act,tgt,pct:tgt>0?(act/tgt)*100:0};});},[isMgr]);
+  const areaBreak=useMemo(()=>{if(!isMgr)return null;return["PU4","PU5","PU6","DU3","DU4"].map(a=>{const act=(rawData||[]).filter(r=>r.a===a).reduce((s,r)=>s+r.v,0);const areaTgt=Object.values(tgt[a]||{}).reduce((s,t)=>s+t,0);return{area:a,act,tgt:areaTgt,pct:areaTgt>0?(act/areaTgt)*100:0};});},[isMgr]);
 
   const downloadCSV=useCallback(()=>{let csv="\uFEFFวันที่,Area,ลูกค้า,แบรนด์,จำนวน,ยอดขาย\n";data.forEach(r=>csv+=`${r.d},${r.a},"${r.c}",${r.b},${r.q},${r.v}\n`);const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`SD0002_${area}_MTD.csv`;a.click();URL.revokeObjectURL(url);},[data,area]);
 
