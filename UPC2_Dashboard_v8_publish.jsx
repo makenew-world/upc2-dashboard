@@ -52,9 +52,9 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,q2Scheme}){
   const data=useMemo(()=>(rawData||[]).filter(r=>filterAreas.includes(r.a)),[area,rawData]);
   const [selBrand,setSelBrand]=useState(null);const [search,setSearch]=useState("");const [expandArea,setExpandArea]=useState(null);
 
-  const brands=useMemo(()=>{const s=new Set();data.forEach(r=>s.add(r.b));return[...s].sort();},[data]);
+  const brands=useMemo(()=>{const s=new Set();data.forEach(r=>s.add(r.b));if(tgt){const at=isMgr?Object.values(tgt).reduce((m,a)=>{Object.keys(a).forEach(b=>m[b]=1);return m;},{}):tgt[area]||{};Object.keys(at).forEach(b=>s.add(b));}return[...s].sort();},[data,tgt,area,isMgr]);
   const activeBrand=selBrand&&brands.includes(selBrand)?selBrand:brands[0]||null;
-  const brandSum=useMemo(()=>{const m={};data.forEach(r=>{if(!m[r.b])m[r.b]={b:r.b,v:0};m[r.b].v+=r.v;});return Object.values(m).sort((a,b)=>b.v-a.v);},[data]);
+  const brandSum=useMemo(()=>{const m={};data.forEach(r=>{if(!m[r.b])m[r.b]={b:r.b,v:0};m[r.b].v+=r.v;});const areaT=isMgr?Object.values(tgt||{}).reduce((acc,a)=>{Object.keys(a).forEach(b=>{if(!acc[b])acc[b]=0;});return acc;},{}):tgt?tgt[area]||{}:{};Object.keys(areaT).forEach(b=>{if(!m[b])m[b]={b,v:0};});return Object.values(m).sort((a,b)=>b.v-a.v);},[data,tgt,area,isMgr]);
   const totalMTD=brandSum.reduce((s,b)=>s+b.v,0);
   const targets=useMemo(()=>{if(isMgr){const m={};Object.values(tgt).forEach(at=>{Object.entries(at).forEach(([b,t])=>{m[b]=(m[b]||0)+t;});});return m;}return tgt[area]||{};},[area,isMgr]);
   const totalTarget=Object.values(targets).reduce((s,t)=>s+t,0);

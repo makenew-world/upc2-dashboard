@@ -197,7 +197,30 @@ def main():
         tgt = {}
 
     scheme_def = build_scheme_def(tgt) if tgt else {}
-    q2_scheme  = build_q2_scheme()
+
+    # Q2 cumulative actuals for months already completed in Q2
+    # Apr actual (last day of Apr), May actual (last day of May) — recovered from git history
+    Q2_PREV_ACT = {
+        "04": {},  # April = first Q2 month, no prior actuals
+        "05": {    # May = second Q2 month, janFebAct = April actuals
+            "PU4": {"EPO Family":851460,  "ZEMI Family":653520,  "Zemidapa":122000, "TOTAL":1527380},
+            "PU5": {"EPO Family":6341850, "ZEMI Family":396704,  "Zemidapa":0,      "TOTAL":6763554},
+            "PU6": {"EPO Family":1579850, "ZEMI Family":627200,  "Zemidapa":0,      "TOTAL":2223350},
+            "DU3": {"EPO Family":0,       "ZEMI Family":1042356, "Zemidapa":165860, "TOTAL":1042356},
+            "DU4": {"EPO Family":0,       "ZEMI Family":2173920, "Zemidapa":42000,  "TOTAL":2173920},
+            "MGR": {"EPO Family":8773160, "ZEMI Family":4893700, "Zemidapa":0,      "TOTAL":13730560},
+        },
+        "06": {    # June = third Q2 month, janFebAct = April + May actuals
+            "PU4": {"EPO Family":3378450,  "ZEMI Family":2075220, "Zemidapa":207900, "TOTAL":5514550},
+            "PU5": {"EPO Family":10814038, "ZEMI Family":1060416, "Zemidapa":0,      "TOTAL":12000654},
+            "PU6": {"EPO Family":3980350,  "ZEMI Family":722960,  "Zemidapa":0,      "TOTAL":4749570},
+            "DU3": {"EPO Family":0,        "ZEMI Family":3034612, "Zemidapa":265860, "TOTAL":3034612},
+            "DU4": {"EPO Family":0,        "ZEMI Family":5016620, "Zemidapa":56000,  "TOTAL":5016620},
+            "MGR": {"EPO Family":18172838, "ZEMI Family":11909828,"Zemidapa":0,      "TOTAL":30316006},
+        },
+    }
+    prev_act = Q2_PREV_ACT.get(month_str, {})
+    q2_scheme  = build_q2_scheme(prev_act_by_area=prev_act)
 
     # Build output
     data = {
