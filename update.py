@@ -44,7 +44,44 @@ MONTHLY_TARGETS = {
         "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":90000},
         "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":90000},
     },
+    # ── Q3 2026 (Jul–Sep) — from "target Q3.csv" ────────────────────────────
+    "07": {
+        "PU4": {"ESPOGEN":1544000,"EPOTIV":428000,"EUVAX":44760,"ZEMIGLO":430500,"ZEMIMET":4550,"ZEMIDAPA":72000},
+        "PU5": {"ESPOGEN":2736000,"EPOTIV":1741600,"EUVAX":43456,"ZEMIGLO":330400,"ZEMIMET":4900,"ZEMIDAPA":48000},
+        "PU6": {"ESPOGEN":1352000,"EPOTIV":388000,"EUVAX":19379,"ZEMIGLO":236600,"ZEMIMET":4550,"ZEMIDAPA":30000},
+        "DU3": {"ZEMIGLO":1956500,"ZEMIMET":66500,"ZEMIDAPA":90000},
+        "DU4": {"ZEMIGLO":1722000,"ZEMIMET":24500,"ZEMIDAPA":90000},
+    },
+    "08": {
+        "PU4": {"ESPOGEN":1737000,"EPOTIV":481500,"EUVAX":50355,"ZEMIGLO":553500,"ZEMIMET":5850,"ZEMIDAPA":120000},
+        "PU5": {"ESPOGEN":3078000,"EPOTIV":1959300,"EUVAX":48888,"ZEMIGLO":424800,"ZEMIMET":6300,"ZEMIDAPA":80000},
+        "PU6": {"ESPOGEN":1521000,"EPOTIV":436500,"EUVAX":21801,"ZEMIGLO":304200,"ZEMIMET":5850,"ZEMIDAPA":50000},
+        "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":150000},
+        "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":150000},
+    },
+    "09": {
+        "PU4": {"ESPOGEN":1544000,"EPOTIV":428000,"EUVAX":44760,"ZEMIGLO":584250,"ZEMIMET":6175,"ZEMIDAPA":168000},
+        "PU5": {"ESPOGEN":2736000,"EPOTIV":1741600,"EUVAX":43456,"ZEMIGLO":448400,"ZEMIMET":6650,"ZEMIDAPA":112000},
+        "PU6": {"ESPOGEN":1352000,"EPOTIV":388000,"EUVAX":19379,"ZEMIGLO":321100,"ZEMIMET":6175,"ZEMIDAPA":70000},
+        "DU3": {"ZEMIGLO":2655250,"ZEMIMET":90250,"ZEMIDAPA":210000},
+        "DU4": {"ZEMIGLO":2337000,"ZEMIMET":33250,"ZEMIDAPA":210000},
+    },
 }
+
+# ── Quarter → months mapping ───────────────────────────────────────────────
+QUARTERS = {
+    "Q1": ["01","02","03"],
+    "Q2": ["04","05","06"],
+    "Q3": ["07","08","09"],
+    "Q4": ["10","11","12"],
+}
+
+def quarter_of(month_str):
+    """Return (quarter_name, [months]) for a given 'MM'."""
+    for q, months in QUARTERS.items():
+        if month_str in months:
+            return q, months
+    return None, []
 
 # ── Scheme definitions per month ───────────────────────────────────────────
 def build_scheme_def(tgt):
@@ -71,13 +108,14 @@ def build_scheme_def(tgt):
     ]
     return defs
 
-# ── Q2 scheme definition (Apr–Jun) ─────────────────────────────────────────
-def build_q2_scheme(prev_act_by_area=None):
-    """Build Q2_SCHEME. prev_act_by_area = dict of {area: {scheme_name: actual}} for months already passed."""
-    months = ["04","05","06"]
+# ── Quarter scheme definition (cumulative over the quarter's months) ────────
+def build_quarter_scheme(months, prev_act_by_area=None):
+    """Build the quarter scheme. months = list of 'MM' in the quarter.
+    prev_act_by_area = {area: {scheme_name: actual}} cumulative for months already passed
+    (janFebAct = actual sales from earlier months in the SAME quarter)."""
     prev_act_by_area = prev_act_by_area or {}
 
-    def q2_total(area, brands_or_none):
+    def q_total(area, brands_or_none):
         total = 0
         for mm in months:
             t = MONTHLY_TARGETS.get(mm, {}).get(area, {})
@@ -91,24 +129,24 @@ def build_q2_scheme(prev_act_by_area=None):
     for a in ["PU4","PU5","PU6"]:
         prev = prev_act_by_area.get(a, {})
         defs[a] = [
-            {"name":"EPO Family","brands":["ESPOGEN","EPOTIV"],"tgt":q2_total(a,["ESPOGEN","EPOTIV"]),"janFebAct":prev.get("EPO Family",0)},
-            {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":q2_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]),"janFebAct":prev.get("ZEMI Family",0)},
-            {"name":"TOTAL","brands":None,"tgt":q2_total(a,None),"janFebAct":prev.get("TOTAL",0)},
+            {"name":"EPO Family","brands":["ESPOGEN","EPOTIV"],"tgt":q_total(a,["ESPOGEN","EPOTIV"]),"janFebAct":prev.get("EPO Family",0)},
+            {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":q_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]),"janFebAct":prev.get("ZEMI Family",0)},
+            {"name":"TOTAL","brands":None,"tgt":q_total(a,None),"janFebAct":prev.get("TOTAL",0)},
         ]
     for a in ["DU3","DU4"]:
         prev = prev_act_by_area.get(a, {})
         defs[a] = [
-            {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":q2_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]),"janFebAct":prev.get("ZEMI Family",0)},
-            {"name":"Zemidapa","brands":["ZEMIDAPA"],"tgt":q2_total(a,["ZEMIDAPA"]),"janFebAct":prev.get("Zemidapa",0)},
+            {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":q_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]),"janFebAct":prev.get("ZEMI Family",0)},
+            {"name":"Zemidapa","brands":["ZEMIDAPA"],"tgt":q_total(a,["ZEMIDAPA"]),"janFebAct":prev.get("Zemidapa",0)},
         ]
     # MGR
     prev = prev_act_by_area.get("MGR", {})
     pu_areas = ["PU4","PU5","PU6"]
     all_areas = ["PU4","PU5","PU6","DU3","DU4"]
     defs["MGR"] = [
-        {"name":"EPO Family","brands":["ESPOGEN","EPOTIV"],"tgt":sum(q2_total(a,["ESPOGEN","EPOTIV"]) for a in pu_areas),"janFebAct":prev.get("EPO Family",0)},
-        {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":sum(q2_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]) for a in all_areas),"janFebAct":prev.get("ZEMI Family",0)},
-        {"name":"TOTAL","brands":None,"tgt":sum(q2_total(a,None) for a in pu_areas)+sum(q2_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]) for a in ["DU3","DU4"]),"janFebAct":prev.get("TOTAL",0)},
+        {"name":"EPO Family","brands":["ESPOGEN","EPOTIV"],"tgt":sum(q_total(a,["ESPOGEN","EPOTIV"]) for a in pu_areas),"janFebAct":prev.get("EPO Family",0)},
+        {"name":"ZEMI Family","brands":["ZEMIGLO","ZEMIMET","ZEMIDAPA"],"tgt":sum(q_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]) for a in all_areas),"janFebAct":prev.get("ZEMI Family",0)},
+        {"name":"TOTAL","brands":None,"tgt":sum(q_total(a,None) for a in pu_areas)+sum(q_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]) for a in ["DU3","DU4"]),"janFebAct":prev.get("TOTAL",0)},
     ]
     return defs
 
@@ -198,11 +236,14 @@ def main():
 
     scheme_def = build_scheme_def(tgt) if tgt else {}
 
-    # Q2 cumulative actuals for months already completed in Q2
-    # Apr actual (last day of Apr), May actual (last day of May) — recovered from git history
-    Q2_PREV_ACT = {
-        "04": {},  # April = first Q2 month, no prior actuals
-        "05": {    # May = second Q2 month, janFebAct = April actuals
+    # Cumulative actuals for months already completed EARLIER in the current quarter.
+    # janFebAct = actual sales of prior months in the SAME quarter (recovered from git history).
+    # Keyed by month "MM". First month of a quarter = {} (no prior actuals yet).
+    # Fill in Aug/Sep etc. at the start of each new month, same as we did for Q2.
+    QUARTER_PREV_ACT = {
+        # ── Q2 (Apr–Jun) ────────────────────────────────────────────────────
+        "04": {},  # April = first Q2 month
+        "05": {    # janFebAct = April actuals
             "PU4": {"EPO Family":851460,  "ZEMI Family":653520,  "Zemidapa":122000, "TOTAL":1527380},
             "PU5": {"EPO Family":6341850, "ZEMI Family":396704,  "Zemidapa":0,      "TOTAL":6763554},
             "PU6": {"EPO Family":1579850, "ZEMI Family":627200,  "Zemidapa":0,      "TOTAL":2223350},
@@ -210,7 +251,7 @@ def main():
             "DU4": {"EPO Family":0,       "ZEMI Family":2173920, "Zemidapa":42000,  "TOTAL":2173920},
             "MGR": {"EPO Family":8773160, "ZEMI Family":4893700, "Zemidapa":0,      "TOTAL":13730560},
         },
-        "06": {    # June = third Q2 month, janFebAct = April + May actuals
+        "06": {    # janFebAct = April + May actuals
             "PU4": {"EPO Family":3378450,  "ZEMI Family":2075220, "Zemidapa":207900, "TOTAL":5514550},
             "PU5": {"EPO Family":10814038, "ZEMI Family":1060416, "Zemidapa":0,      "TOTAL":12000654},
             "PU6": {"EPO Family":3980350,  "ZEMI Family":722960,  "Zemidapa":0,      "TOTAL":4749570},
@@ -218,18 +259,33 @@ def main():
             "DU4": {"EPO Family":0,        "ZEMI Family":5016620, "Zemidapa":56000,  "TOTAL":5016620},
             "MGR": {"EPO Family":18172838, "ZEMI Family":11909828,"Zemidapa":0,      "TOTAL":30316006},
         },
+        # ── Q3 (Jul–Sep) ────────────────────────────────────────────────────
+        "07": {},  # July = first Q3 month
+        # "08": {...},  # fill at start of Aug: janFebAct = July actuals
+        # "09": {...},  # fill at start of Sep: janFebAct = Jul + Aug actuals
     }
-    prev_act = Q2_PREV_ACT.get(month_str, {})
-    q2_scheme  = build_q2_scheme(prev_act_by_area=prev_act)
+
+    # Determine current quarter from the detected month
+    quarter_name, quarter_months = quarter_of(month_str)
+    if quarter_name:
+        quarter_label  = quarter_name
+        quarter_period = f"{THAI_MONTHS[int(quarter_months[0])]}–{THAI_MONTHS[int(quarter_months[-1])]}"
+    else:
+        quarter_label, quarter_period, quarter_months = "", "", []
+
+    prev_act       = QUARTER_PREV_ACT.get(month_str, {})
+    quarter_scheme = build_quarter_scheme(quarter_months, prev_act_by_area=prev_act) if quarter_months else {}
 
     # Build output
     data = {
-        "dataDate":  data_date,
-        "mtdLabel":  mtd_label,
-        "raw":       entries,
-        "tgt":       tgt,
-        "schemeDef": scheme_def,
-        "q2Scheme":  q2_scheme,
+        "dataDate":      data_date,
+        "mtdLabel":      mtd_label,
+        "raw":           entries,
+        "tgt":           tgt,
+        "schemeDef":     scheme_def,
+        "quarterScheme": quarter_scheme,
+        "quarterLabel":  quarter_label,   # e.g. "Q3"
+        "quarterPeriod": quarter_period,  # e.g. "ก.ค.–ก.ย."
     }
 
     # Write data.json next to this script
@@ -250,6 +306,8 @@ def main():
     print(f"\n✅  สำเร็จ!")
     print(f"   📅  วันที่ล่าสุด : {data_date}")
     print(f"   📊  เดือน        : {mtd_label}")
+    if quarter_label:
+        print(f"   📈  ไตรมาส       : {quarter_label} ({quarter_period})")
     print(f"   📋  จำนวนรายการ  : {len(entries)} รายการ")
     print(f"   💾  บันทึกไปที่  : {out_path}")
     print(f"\n   ถ้าใช้ GitHub Pages: git add data.json && git commit -m 'data: {data_date}' && git push")

@@ -120,20 +120,26 @@ git add data.json && git commit -m "data: DD Mon" && git push
 
 ---
 
-## วิธีอัพเดต Target (ต้นเดือน)
+## วิธีอัพเดต Target (ต้นเดือน / ต้นไตรมาส)
 
-เมื่อขึ้นเดือนใหม่ ให้แก้ใน JSX และ update.py:
+**ตอนนี้ JSX ไม่ต้องแก้แล้ว** — label เดือน/ไตรมาสทั้งหมดดึงจาก data.json อัตโนมัติ
+(เดือนจาก `mtdLabel`, ไตรมาสจาก `quarterLabel`/`quarterPeriod`) ทุกอย่างอยู่ใน `update.py`
 
-1. **JSX** (`UPC2_Dashboard_v8_publish.jsx`):
-   - เปลี่ยนชื่อตัวแปร target เช่น `APR_TGT` → `MAY_TGT`
-   - อัพเดต `SCHEME_DEF` (monthly scheme targets)
-   - อัพเดต `Q2_SCHEME` — ใส่ `janFebAct` = ยอด actual เดือนก่อนๆ ใน Q2
-   - อัพเดต label ใน UI: `(เป้า เม.ย.)` → `(เป้า พ.ค.)` เป็นต้น
+### ต้นเดือน (ระหว่างไตรมาส เช่น ขึ้น ส.ค. หรือ ก.ย.)
+แก้ `update.py` → `QUARTER_PREV_ACT` เท่านั้น:
+- เพิ่ม key เดือนใหม่ = ยอด **actual สะสม** ของเดือนก่อนๆ ในไตรมาสเดียวกัน
+  (เช่น ขึ้น ส.ค. → ใส่ `"08"` = ยอด actual ก.ค.; ขึ้น ก.ย. → ใส่ `"09"` = ก.ค.+ส.ค.)
+- ดูยอด actual สะสมได้จาก data.json วันสุดท้ายของเดือนก่อน หรือ git log
+- แต่ละ area ใส่ `{"EPO Family":…, "ZEMI Family":…, "Zemidapa":…, "TOTAL":…}` + `MGR` = ผลรวม
+- เดือนแรกของไตรมาส (04/07/10) = `{}` (ไม่มี actual ก่อนหน้า)
 
-2. **update.py** — `MONTHLY_TARGETS` dict มี target ทุกเดือนอยู่แล้ว ไม่ต้องแก้
+### ต้นไตรมาสใหม่ (เช่น ขึ้น Q4 = ต.ค.)
+1. เพิ่ม target 3 เดือนใหม่ใน `MONTHLY_TARGETS` (เช่น `"10"`,`"11"`,`"12"`) จากไฟล์ target CSV
+2. เพิ่ม key เดือนแรกของไตรมาส `"10": {}` ใน `QUARTER_PREV_ACT`
+3. `QUARTERS` dict มี Q1–Q4 ครบแล้ว — ระบบ detect ไตรมาสเองจากวันที่ในไฟล์ Excel
 
-3. ดึง target จาก Excel: `Target and Achievement UPC2 Team 2026.xlsx`
-   → sheet "Data Input" → section "TARGET INPUT 2026" → คอลัมน์ของเดือนนั้น
+ดึง target จาก: `Target and Achievement UPC2 Team 2026.xlsx` (sheet "Data Input")
+หรือไฟล์ CSV ที่ผู้ใช้ส่งมา (คอลัมน์ Jan–Sep = ตรงกับเดือน)
 
 ---
 
@@ -157,11 +163,13 @@ git add data.json && git commit -m "data: DD Mon" && git push
 
 ## สถานะปัจจุบัน
 
-- **เดือน:** เมษายน 2569 (April 2026)
+- **เดือน:** มิถุนายน→กรกฎาคม 2569 (กำลังขึ้น Q3)
 - **Dashboard version:** v8 (publish)
-- **ข้อมูลล่าสุด:** 3 เม.ย. 2569 (53 รายการ)
-- **GitHub Pages:** ยังไม่ได้ deploy (ดู DEPLOY.md)
-- **Q1 (ม.ค.–มี.ค.):** เสร็จสิ้นแล้ว กำลังอยู่ใน Q2
+- **ข้อมูลล่าสุด:** 29 มิ.ย. 2569 (204 รายการ)
+- **GitHub Pages:** deploy แล้ว → https://makenew-world.github.io/upc2-dashboard/
+- **Q2 (เม.ย.–มิ.ย.):** เสร็จสิ้น | **Q3 (ก.ค.–ก.ย.):** target ใส่ครบแล้วใน update.py
+- **หมายเหตุ:** ก.ค. เป็นเดือนแรกของ Q3 → พอมีไฟล์ ก.ค. รันได้เลย ระบบ detect Q3 เอง
+  ต้นเดือน ส.ค. อย่าลืมใส่ actual ก.ค. ใน `QUARTER_PREV_ACT["08"]`
 
 ---
 
@@ -174,3 +182,7 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | v8 → Apr | เปลี่ยน Q1_SCHEME → Q2_SCHEME (เม.ย.–มิ.ย.) |
 | v8 → Apr | Refactor: แยก data.json ออกจาก JSX เพื่อลด token การอัพเดตรายวัน |
 | v8 → Apr | สร้าง update.py สำหรับอัพเดตข้อมูลโดยไม่ต้องใช้ Claude |
+| Jun | Fix: pin `@babel/standalone@7.26.4` (classic runtime) แก้หน้าจอว่าง |
+| Jun | Fix: label เดือนดึงจาก `mtdLabel` อัตโนมัติ (ไม่ต้องแก้มือทุกเดือน) |
+| Jul/Q3 | เพิ่ม target Q3 (ก.ค.–ก.ย.) + refactor เป็น quarter-generic: `QUARTERS`, `build_quarter_scheme`, `QUARTER_PREV_ACT` |
+| Jul/Q3 | data.json เปลี่ยน `q2Scheme` → `quarterScheme` + เพิ่ม `quarterLabel`/`quarterPeriod` (label ไตรมาส auto) |
