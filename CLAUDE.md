@@ -17,14 +17,19 @@ Dashboard แสดงผล MTD Sales Achievement สำหรับทีม U
 
 ```
 Sale Dashboard/
-├── UPC2_Dashboard_v8_publish.jsx   ← Dashboard UI (แก้ต้นเดือน)
+├── UPC2_Dashboard_v8_publish.jsx   ← Dashboard UI ★ SOURCE OF TRUTH — แก้โค้ด UI ที่นี่ที่เดียว
 ├── data.json                        ← ข้อมูลยอดขาย (อัพเดตทุกวัน)
-├── update.py                        ← script อัพเดต data.json จาก Excel
-├── index.html                       ← HTML wrapper สำหรับ deploy
+├── update.py                        ← script อัพเดต data.json + sync JSX → index.html
+├── index.html                       ← GENERATED — ห้ามแก้ส่วน JSX ตรงๆ (update.py เขียนทับ)
 ├── serve.py                         ← Python local server (ใช้ preview)
 ├── DEPLOY.md                        ← คู่มือ deploy GitHub Pages
 └── CLAUDE.md                        ← ไฟล์นี้
 ```
+
+**⚠️ กฎสำคัญ:** โค้ด UI แก้ที่ `UPC2_Dashboard_v8_publish.jsx` เท่านั้น แล้วรัน `python3 update.py`
+— script จะ inline JSX เข้า `index.html` ให้อัตโนมัติ (ส่วน `<script type="text/babel">`)
+ห้ามแก้ JSX ใน index.html ตรงๆ เพราะจะถูกเขียนทับ และเคยเกิด bug จากสองไฟล์ไม่ตรงกันมาแล้ว
+(หลัง commit ต้อง `git add index.html` คู่กับ `.jsx` เสมอ)
 
 ### Local Preview Server
 - ไฟล์ serve.py จริงอยู่ที่ `/tmp/upc2_dashboard/serve.py` (sandbox ของ preview tool)
@@ -186,3 +191,6 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Jun | Fix: label เดือนดึงจาก `mtdLabel` อัตโนมัติ (ไม่ต้องแก้มือทุกเดือน) |
 | Jul/Q3 | เพิ่ม target Q3 (ก.ค.–ก.ย.) + refactor เป็น quarter-generic: `QUARTERS`, `build_quarter_scheme`, `QUARTER_PREV_ACT` |
 | Jul/Q3 | data.json เปลี่ยน `q2Scheme` → `quarterScheme` + เพิ่ม `quarterLabel`/`quarterPeriod` (label ไตรมาส auto) |
+| Jul | Fix crash กดขยาย Area ใน MGR view (โค้ดอ้าง `q2Scheme` ชื่อเก่า → ReferenceError หน้าขาว) |
+| Jul | ยอด actual ใน Scheme cards แสดงตัวเลขเต็ม (`fmt`) แทนตัวย่อ M/K — target ยังย่อเหมือนเดิม |
+| Jul | update.py sync JSX → index.html อัตโนมัติทุกครั้งที่รัน (single source of truth กันโค้ดสองไฟล์ไม่ตรงกัน) |

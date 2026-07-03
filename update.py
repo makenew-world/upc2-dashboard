@@ -150,6 +150,32 @@ def build_quarter_scheme(months, prev_act_by_area=None):
     ]
     return defs
 
+# ── Sync JSX into index.html (single source of truth) ──────────────────────
+def sync_index_html(out_dir):
+    """Inline UPC2_Dashboard_v8_publish.jsx into index.html between the
+    text/babel <script> markers. Prevents the two copies drifting apart
+    (root cause of the July blank-page bug)."""
+    jsx_path  = os.path.join(out_dir, "UPC2_Dashboard_v8_publish.jsx")
+    html_path = os.path.join(out_dir, "index.html")
+    if not (os.path.exists(jsx_path) and os.path.exists(html_path)):
+        return False
+    with open(jsx_path, encoding="utf-8") as f:  jsx  = f.read().rstrip("\n")
+    with open(html_path, encoding="utf-8") as f: html = f.read()
+    start_marker = '<script type="text/babel" data-presets="react">'
+    i = html.find(start_marker)
+    if i == -1:
+        print("⚠️   ไม่พบ babel script marker ใน index.html — ข้ามการ sync")
+        return False
+    j = html.find("</script>", i)
+    if j == -1:
+        return False
+    new_html = html[:i+len(start_marker)] + "\n" + jsx + "\n  " + html[j:]
+    if new_html != html:
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(new_html)
+        return True
+    return False
+
 # ── Find Excel file ─────────────────────────────────────────────────────────
 def find_excel():
     if len(sys.argv) > 1:
@@ -290,6 +316,8 @@ def main():
 
     # Write data.json next to this script
     out_dir  = os.path.dirname(os.path.abspath(__file__))
+    if sync_index_html(out_dir):
+        print("🔧  ซิงค์ JSX → index.html แล้ว (โค้ดมีการแก้ไข)")
     out_path = os.path.join(out_dir, "data.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
@@ -301,6 +329,8 @@ def main():
         shutil.copy(out_path, os.path.join(tmp_dir, "data.json"))
         shutil.copy(os.path.join(out_dir, "UPC2_Dashboard_v8_publish.jsx"),
                     os.path.join(tmp_dir, "UPC2_Dashboard_v8_publish.jsx"))
+        shutil.copy(os.path.join(out_dir, "index.html"),
+                    os.path.join(tmp_dir, "index.html"))
         print(f"🔄  ซิงค์ไปยัง /tmp/upc2_dashboard/ แล้ว")
 
     print(f"\n✅  สำเร็จ!")
