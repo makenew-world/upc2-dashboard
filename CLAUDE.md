@@ -168,13 +168,13 @@ git add data.json && git commit -m "data: DD Mon" && git push
 
 ## สถานะปัจจุบัน
 
-- **เดือน:** มิถุนายน→กรกฎาคม 2569 (กำลังขึ้น Q3)
+- **เดือน:** สิงหาคม 2569 (อยู่ใน Q3)
 - **Dashboard version:** v8 (publish)
-- **ข้อมูลล่าสุด:** 29 มิ.ย. 2569 (204 รายการ)
+- **ข้อมูลล่าสุด:** 5 ส.ค. 2569 (50 รายการ)
 - **GitHub Pages:** deploy แล้ว → https://makenew-world.github.io/upc2-dashboard/
-- **Q2 (เม.ย.–มิ.ย.):** เสร็จสิ้น | **Q3 (ก.ค.–ก.ย.):** target ใส่ครบแล้วใน update.py
-- **หมายเหตุ:** ก.ค. เป็นเดือนแรกของ Q3 → พอมีไฟล์ ก.ค. รันได้เลย ระบบ detect Q3 เอง
-  ต้นเดือน ส.ค. อย่าลืมใส่ actual ก.ค. ใน `QUARTER_PREV_ACT["08"]`
+- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ, `QUARTER_PREV_ACT["08"]` ใส่ยอดสะสม ก.ค. แล้ว (จาก data.json 30 ก.ค. 2569 = 225 รายการ)
+- **หมายเหตุ:** ต้นเดือน ก.ย. อย่าลืมใส่ actual ก.ค.+ส.ค. ใน `QUARTER_PREV_ACT["09"]`
+  (ดูยอดสะสมได้จาก data.json วันสุดท้ายของ ส.ค. หรือ `git show <commit>:data.json`)
 
 ---
 
@@ -194,3 +194,5 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Jul | Fix crash กดขยาย Area ใน MGR view (โค้ดอ้าง `q2Scheme` ชื่อเก่า → ReferenceError หน้าขาว) |
 | Jul | ยอด actual ใน Scheme cards แสดงตัวเลขเต็ม (`fmt`) แทนตัวย่อ M/K — target ยังย่อเหมือนเดิม |
 | Jul | update.py sync JSX → index.html อัตโนมัติทุกครั้งที่รัน (single source of truth กันโค้ดสองไฟล์ไม่ตรงกัน) |
+| Jul | เอาสัญลักษณ์ ฿ ออกทั้งหมด (ให้ copy ตัวเลขไปใช้ต่อง่าย) + เพิ่ม tabular-nums ให้ตัวเลขเรียงตรงกัน |
+| Aug | Fix: ลืมใส่ `QUARTER_PREV_ACT["08"]` ตอนขึ้นเดือน ส.ค. — Q3 Scheme เคยนับแค่ยอด ส.ค. ไม่รวม ก.ค. |
