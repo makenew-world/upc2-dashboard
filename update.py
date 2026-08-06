@@ -287,7 +287,14 @@ def main():
         },
         # ── Q3 (Jul–Sep) ────────────────────────────────────────────────────
         "07": {},  # July = first Q3 month
-        # "08": {...},  # fill at start of Aug: janFebAct = July actuals
+        "08": {    # janFebAct = July actuals (as of 30 ก.ค. 2569, last data before Aug — 225 rows)
+            "PU4": {"EPO Family":2427360, "ZEMI Family":930300,  "Zemidapa":132300, "TOTAL":3414660},
+            "PU5": {"EPO Family":5513840, "ZEMI Family":582400,  "Zemidapa":0,      "TOTAL":6145800},
+            "PU6": {"EPO Family":1862610, "ZEMI Family":159600,  "Zemidapa":0,      "TOTAL":2059250},
+            "DU3": {"EPO Family":0,       "ZEMI Family":2292500, "Zemidapa":21840,  "TOTAL":2292500},
+            "DU4": {"EPO Family":0,       "ZEMI Family":2094400, "Zemidapa":0,      "TOTAL":2094400},
+            "MGR": {"EPO Family":9803810, "ZEMI Family":6059200, "Zemidapa":0,      "TOTAL":16006610},
+        },
         # "09": {...},  # fill at start of Sep: janFebAct = Jul + Aug actuals
     }
 
