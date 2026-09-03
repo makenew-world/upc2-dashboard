@@ -82,7 +82,7 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,quarterSche
       </div>
       <div style={{background:"#eff6ff",borderRadius:10,padding:"7px 12px",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
         <span style={{fontSize:11}}>📅</span><span style={{fontSize:12,color:"#3b82f6",fontWeight:600}}>ข้อมูลอัพเดต: {dataDate}</span>
-        <span style={{fontSize:10,color:"#94a3b8",marginLeft:"auto"}}>{(rawData||[]).length} รายการ</span>
+        <span style={{fontSize:10,color:"#94a3b8",marginLeft:"auto"}}>{data.length} รายการ</span>
       </div>
 
       <div style={{...card,padding:"20px 16px"}}><div style={{...sec,textAlign:"center"}}>MTD Achievement</div>
