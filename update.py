@@ -295,7 +295,14 @@ def main():
             "DU4": {"EPO Family":0,       "ZEMI Family":2094400, "Zemidapa":0,      "TOTAL":2094400},
             "MGR": {"EPO Family":9803810, "ZEMI Family":6059200, "Zemidapa":0,      "TOTAL":16006610},
         },
-        # "09": {...},  # fill at start of Sep: janFebAct = Jul + Aug actuals
+        "09": {    # janFebAct = July + August actuals (as of 28 ส.ค. 2569, last data before Sep — 222 rows)
+            "PU4": {"EPO Family":4260590,  "ZEMI Family":1173060,  "Zemidapa":247380, "TOTAL":5500730},
+            "PU5": {"EPO Family":10774368, "ZEMI Family":1084552,  "Zemidapa":0,      "TOTAL":11938160},
+            "PU6": {"EPO Family":3150360,  "ZEMI Family":857640,   "Zemidapa":0,      "TOTAL":4056880},
+            "DU3": {"EPO Family":0,        "ZEMI Family":6485668,  "Zemidapa":954240, "TOTAL":6485668},
+            "DU4": {"EPO Family":0,        "ZEMI Family":5578300,  "Zemidapa":302400, "TOTAL":5578300},
+            "MGR": {"EPO Family":18185318, "ZEMI Family":15179220, "Zemidapa":0,      "TOTAL":33559738},
+        },
     }
 
     # Determine current quarter from the detected month
