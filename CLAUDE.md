@@ -168,13 +168,13 @@ git add data.json && git commit -m "data: DD Mon" && git push
 
 ## สถานะปัจจุบัน
 
-- **เดือน:** สิงหาคม 2569 (อยู่ใน Q3)
+- **เดือน:** กันยายน 2569 (เดือนสุดท้ายของ Q3)
 - **Dashboard version:** v8 (publish)
-- **ข้อมูลล่าสุด:** 5 ส.ค. 2569 (50 รายการ)
+- **ข้อมูลล่าสุด:** 2 ก.ย. 2569 (24 รายการ)
 - **GitHub Pages:** deploy แล้ว → https://makenew-world.github.io/upc2-dashboard/
-- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ, `QUARTER_PREV_ACT["08"]` ใส่ยอดสะสม ก.ค. แล้ว (จาก data.json 30 ก.ค. 2569 = 225 รายการ)
-- **หมายเหตุ:** ต้นเดือน ก.ย. อย่าลืมใส่ actual ก.ค.+ส.ค. ใน `QUARTER_PREV_ACT["09"]`
-  (ดูยอดสะสมได้จาก data.json วันสุดท้ายของ ส.ค. หรือ `git show <commit>:data.json`)
+- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ, `QUARTER_PREV_ACT["09"]` ใส่ยอดสะสม ก.ค.+ส.ค. แล้ว (จาก data.json 28 ส.ค. 2569 = 222 รายการ)
+- **หมายเหตุ:** ต้นเดือน ต.ค. จะขึ้น Q4 ใหม่ — ต้องเพิ่ม target Q4 ใน `MONTHLY_TARGETS` (ดู "วิธีอัพเดต Target" ด้านบน หัวข้อ "ต้นไตรมาสใหม่")
+  และตั้ง `QUARTER_PREV_ACT["10"] = {}` (เดือนแรกของไตรมาสใหม่ ไม่มี actual ก่อนหน้า)
 
 ---
 
@@ -196,3 +196,4 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Jul | update.py sync JSX → index.html อัตโนมัติทุกครั้งที่รัน (single source of truth กันโค้ดสองไฟล์ไม่ตรงกัน) |
 | Jul | เอาสัญลักษณ์ ฿ ออกทั้งหมด (ให้ copy ตัวเลขไปใช้ต่อง่าย) + เพิ่ม tabular-nums ให้ตัวเลขเรียงตรงกัน |
 | Aug | Fix: ลืมใส่ `QUARTER_PREV_ACT["08"]` ตอนขึ้นเดือน ส.ค. — Q3 Scheme เคยนับแค่ยอด ส.ค. ไม่รวม ก.ค. |
+| Sep | Fix: ลืมใส่ `QUARTER_PREV_ACT["09"]` ตอนขึ้นเดือน ก.ย. — Q3 Scheme เคยนับแค่ยอด ก.ย. ไม่รวม ก.ค.+ส.ค. |

@@ -313,6 +313,15 @@ def main():
     else:
         quarter_label, quarter_period, quarter_months = "", "", []
 
+    # Safety net: this has been forgotten twice already (Aug, Sep) — if the
+    # current month isn't the first month of its quarter but has no explicit
+    # QUARTER_PREV_ACT entry, the quarter scheme silently undercounts (treats
+    # it as if no prior months happened). Warn loudly instead of failing silently.
+    is_first_month_of_quarter = bool(quarter_months) and month_str == quarter_months[0]
+    if quarter_months and not is_first_month_of_quarter and month_str not in QUARTER_PREV_ACT:
+        print(f"⚠️⚠️⚠️  QUARTER_PREV_ACT[\"{month_str}\"] ยังไม่ได้ใส่! Q3 Scheme การ์ดจะนับยอดผิด (ขาดเดือนก่อนหน้าในไตรมาสเดียวกัน)")
+        print(f"    ไปเพิ่มใน update.py — ดูยอดสะสมจาก data.json วันสุดท้ายของเดือนก่อน หรือ git log")
+
     prev_act       = QUARTER_PREV_ACT.get(month_str, {})
     quarter_scheme = build_quarter_scheme(quarter_months, prev_act_by_area=prev_act) if quarter_months else {}
 
