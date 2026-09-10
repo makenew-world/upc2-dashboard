@@ -59,10 +59,10 @@ MONTHLY_TARGETS = {
         "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":150000},
         "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":150000},
     },
-    "09": {
-        "PU4": {"ESPOGEN":1544000,"EPOTIV":428000,"EUVAX":44760,"ZEMIGLO":584250,"ZEMIMET":6175,"ZEMIDAPA":168000},
-        "PU5": {"ESPOGEN":2736000,"EPOTIV":1741600,"EUVAX":43456,"ZEMIGLO":448400,"ZEMIMET":6650,"ZEMIDAPA":112000},
-        "PU6": {"ESPOGEN":1352000,"EPOTIV":388000,"EUVAX":19379,"ZEMIGLO":321100,"ZEMIMET":6175,"ZEMIDAPA":70000},
+    "09": {   # Sep: EPOTIV/ESPOGEN ปรับใหม่ 10 ก.ย. 2569 จากไฟล์ Target (01 Sale Update/Achievement)
+        "PU4": {"ESPOGEN":1728893.41638346,"EPOTIV":49835.48945869,"EUVAX":44760,"ZEMIGLO":584250,"ZEMIMET":6175,"ZEMIDAPA":168000},
+        "PU5": {"ESPOGEN":3407676.4165966,"EPOTIV":202788.52439547,"EUVAX":43456,"ZEMIGLO":448400,"ZEMIMET":6650,"ZEMIDAPA":112000},
+        "PU6": {"ESPOGEN":1575196.8257451,"EPOTIV":45177.96707938,"EUVAX":19379,"ZEMIGLO":321100,"ZEMIMET":6175,"ZEMIDAPA":70000},
         "DU3": {"ZEMIGLO":2655250,"ZEMIMET":90250,"ZEMIDAPA":210000},
         "DU4": {"ZEMIGLO":2337000,"ZEMIMET":33250,"ZEMIDAPA":210000},
     },
@@ -295,13 +295,14 @@ def main():
             "DU4": {"EPO Family":0,       "ZEMI Family":2094400, "Zemidapa":0,      "TOTAL":2094400},
             "MGR": {"EPO Family":9803810, "ZEMI Family":6059200, "Zemidapa":0,      "TOTAL":16006610},
         },
-        "09": {    # janFebAct = July + August actuals (as of 28 ส.ค. 2569, last data before Sep — 222 rows)
-            "PU4": {"EPO Family":4260590,  "ZEMI Family":1173060,  "Zemidapa":247380, "TOTAL":5500730},
-            "PU5": {"EPO Family":10774368, "ZEMI Family":1084552,  "Zemidapa":0,      "TOTAL":11938160},
-            "PU6": {"EPO Family":3150360,  "ZEMI Family":857640,   "Zemidapa":0,      "TOTAL":4056880},
-            "DU3": {"EPO Family":0,        "ZEMI Family":6485668,  "Zemidapa":954240, "TOTAL":6485668},
-            "DU4": {"EPO Family":0,        "ZEMI Family":5578300,  "Zemidapa":302400, "TOTAL":5578300},
-            "MGR": {"EPO Family":18185318, "ZEMI Family":15179220, "Zemidapa":0,      "TOTAL":33559738},
+        "09": {    # janFebAct = ยอด actual ก.ค.+ส.ค. จากไฟล์ Target and Achievement (sheet "Data Input")
+                   # ใช้ไฟล์แทน data.json เพราะ data.json ขาดยอดวันสิ้นเดือน (31 ก.ค. / 31 ส.ค.)
+            "PU4": {"EPO Family":4378190,    "ZEMI Family":1173060,  "Zemidapa":247380, "TOTAL":5618330},
+            "PU5": {"EPO Family":10807967.5, "ZEMI Family":1084552,  "Zemidapa":0,      "TOTAL":11971759.5},
+            "PU6": {"EPO Family":3150360,    "ZEMI Family":857640,   "Zemidapa":0,      "TOTAL":4056880},
+            "DU3": {"EPO Family":0,          "ZEMI Family":6492528,  "Zemidapa":954240, "TOTAL":6492528},
+            "DU4": {"EPO Family":0,          "ZEMI Family":5578300,  "Zemidapa":302400, "TOTAL":5578300},
+            "MGR": {"EPO Family":18336517.5, "ZEMI Family":15186080, "Zemidapa":0,      "TOTAL":33717797.5},
         },
     }
 

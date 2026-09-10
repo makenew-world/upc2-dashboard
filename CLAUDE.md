@@ -175,8 +175,14 @@ git add data.json && git commit -m "data: DD Mon" && git push
 - Column AO (index 40): Borrow Amount
 - **ยอดขาย = Net Sales Amount − Borrow Amount** (กรอง row ที่ value = 0 ออก)
 
-### Target and Achievement UPC2 Team 2026.xlsx
-- Sheet "Data Input": actual sales + target ทุกเดือน
+### Target and Achievement UPC2 Team 2026.xlsx  ★ แหล่งอ้างอิงหลักของ target/actual
+**path จริงที่ใช้:** `LG Chem/01 Sale Update/Achievement/Target and Achievement UPC2 Team 2026.xlsx`
+(ไฟล์ชื่อเดียวกันในโฟลเดอร์ Sale Dashboard **เก่า/ไม่อัพเดต** — actual มีแค่ถึง มี.ค. อย่าใช้)
+
+- Sheet "Data Input" แถว 5–28 = **ACTUAL** รายเดือน, แถว 40–63 = **TARGET** รายเดือน
+  (คอลัมน์ C=Jan … N=Dec ตรงกับเดือน)
+- ยอด actual ในไฟล์นี้ **ครบกว่า data.json** เพราะ data.json ขาดยอดวันสิ้นเดือน
+  → เวลาจะเติม `QUARTER_PREV_ACT` ให้ดึงจากไฟล์นี้ ไม่ใช่จาก data.json
 - Sheet "Ref. Target": อ้างอิง
 
 ---
@@ -187,7 +193,8 @@ git add data.json && git commit -m "data: DD Mon" && git push
 - **Dashboard version:** v8 (publish)
 - **ข้อมูลล่าสุด:** 2 ก.ย. 2569 (24 รายการ)
 - **GitHub Pages:** deploy แล้ว → https://makenew-world.github.io/upc2-dashboard/
-- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ, `QUARTER_PREV_ACT["09"]` ใส่ยอดสะสม ก.ค.+ส.ค. แล้ว (จาก data.json 28 ส.ค. 2569 = 222 รายการ)
+- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ (ก.ย. ปรับ EPOTIV/ESPOGEN แล้ว), `QUARTER_PREV_ACT["09"]` ใช้ actual ก.ค.+ส.ค. จากไฟล์ Target
+- **⚠️ Q4 ยังไม่พร้อม:** ไฟล์ Target กรอก ต.ค.–ธ.ค. ไว้แค่ EPOTIV/ESPOGEN — EUVAX/ZEMIGLO/ZEMIMET/ZEMIDAPA ยังว่าง ต้องให้ผู้ใช้กรอกครบก่อนขึ้นเดือน ต.ค.
 - **หมายเหตุ:** ต้นเดือน ต.ค. จะขึ้น Q4 ใหม่ — ต้องเพิ่ม target Q4 ใน `MONTHLY_TARGETS` (ดู "วิธีอัพเดต Target" ด้านบน หัวข้อ "ต้นไตรมาสใหม่")
   และตั้ง `QUARTER_PREV_ACT["10"] = {}` (เดือนแรกของไตรมาสใหม่ ไม่มี actual ก่อนหน้า)
 
@@ -212,3 +219,5 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Jul | เอาสัญลักษณ์ ฿ ออกทั้งหมด (ให้ copy ตัวเลขไปใช้ต่อง่าย) + เพิ่ม tabular-nums ให้ตัวเลขเรียงตรงกัน |
 | Aug | Fix: ลืมใส่ `QUARTER_PREV_ACT["08"]` ตอนขึ้นเดือน ส.ค. — Q3 Scheme เคยนับแค่ยอด ส.ค. ไม่รวม ก.ค. |
 | Sep | Fix: ลืมใส่ `QUARTER_PREV_ACT["09"]` ตอนขึ้นเดือน ก.ย. — Q3 Scheme เคยนับแค่ยอด ก.ย. ไม่รวม ก.ค.+ส.ค. |
+| Sep | ปรับ target ก.ย. ของ EPOTIV/ESPOGEN (PU4/PU5/PU6) ตามไฟล์ Target ใหม่ — เป้า EPO Family ลด 1,180,031 |
+| Sep | เปลี่ยน `QUARTER_PREV_ACT["09"]` ไปใช้ actual ก.ค.+ส.ค. จากไฟล์ Target (ครบกว่า data.json +158,060) |
