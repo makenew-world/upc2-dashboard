@@ -21,8 +21,46 @@ except ImportError:
 THAI_MONTHS = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
                'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
 
+# ── Target & Achievement workbook (authoritative monthly ACTUAL) ────────────
+# Prior-month actuals for the quarter and full-year cards are read from sheet
+# "Data Input" of this workbook on every run, so nothing has to be typed in by
+# hand at the start of each month. It also contains customers that the daily
+# SD0002 export leaves out (e.g. KT Medical Service, Dr.Somchit).
+TARGET_YEAR     = 2026
+TARGET_WORKBOOK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                               "01 Sale Update", "Achievement",
+                               "Target and Achievement UPC2 Team 2026.xlsx")
+AREAS        = ["PU4","PU5","PU6","DU3","DU4"]
+PU_AREAS     = ["PU4","PU5","PU6"]
+DU_AREAS     = ["DU3","DU4"]
+YEAR_MONTHS  = [f"{m:02d}" for m in range(1, 13)]
+PRODUCT_NAME = {"Epotiv":"EPOTIV","Espogen":"ESPOGEN","Euvax-B":"EUVAX",
+                "Zemiglo":"ZEMIGLO","Zemimet":"ZEMIMET","Zemidapa":"ZEMIDAPA"}
+
 # ── Targets per month (key = "MM") ─────────────────────────────────────────
 MONTHLY_TARGETS = {
+    # ── Q1 2026 (Jan–Mar) — from Target workbook (needed for the full-year target) ──
+    "01": {
+        "PU4": {"ESPOGEN":1158000,"EPOTIV":321000,"EUVAX":33570,"ZEMIGLO":430500,"ZEMIMET":4550,"ZEMIDAPA":48000},
+        "PU5": {"ESPOGEN":2052000,"EPOTIV":1306200,"EUVAX":32592,"ZEMIGLO":330400,"ZEMIMET":4900,"ZEMIDAPA":32000},
+        "PU6": {"ESPOGEN":1014000,"EPOTIV":291000,"EUVAX":14534.04,"ZEMIGLO":236600,"ZEMIMET":4550,"ZEMIDAPA":20000},
+        "DU3": {"ZEMIGLO":1956500,"ZEMIMET":66500,"ZEMIDAPA":60000},
+        "DU4": {"ZEMIGLO":1722000,"ZEMIMET":24500,"ZEMIDAPA":60000},
+    },
+    "02": {
+        "PU4": {"ESPOGEN":1544000,"EPOTIV":428000,"EUVAX":44760,"ZEMIGLO":461250,"ZEMIMET":4875,"ZEMIDAPA":48000},
+        "PU5": {"ESPOGEN":2736000,"EPOTIV":1741600,"EUVAX":43456,"ZEMIGLO":354000,"ZEMIMET":5250,"ZEMIDAPA":32000},
+        "PU6": {"ESPOGEN":1352000,"EPOTIV":388000,"EUVAX":19378.72,"ZEMIGLO":253500,"ZEMIMET":4875,"ZEMIDAPA":20000},
+        "DU3": {"ZEMIGLO":2096250,"ZEMIMET":71250,"ZEMIDAPA":60000},
+        "DU4": {"ZEMIGLO":1845000,"ZEMIMET":26250,"ZEMIDAPA":60000},
+    },
+    "03": {
+        "PU4": {"ESPOGEN":1737000,"EPOTIV":481500,"EUVAX":50355,"ZEMIGLO":553500,"ZEMIMET":5850,"ZEMIDAPA":60000},
+        "PU5": {"ESPOGEN":3078000,"EPOTIV":1959300,"EUVAX":48888,"ZEMIGLO":424800,"ZEMIMET":6300,"ZEMIDAPA":40000},
+        "PU6": {"ESPOGEN":1521000,"EPOTIV":436500,"EUVAX":21801.06,"ZEMIGLO":304200,"ZEMIMET":5850,"ZEMIDAPA":25000},
+        "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":75000},
+        "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":75000},
+    },
     "04": {
         "PU4": {"ESPOGEN":1351000,"EPOTIV":374500,"EUVAX":39165,"ZEMIGLO":461250,"ZEMIMET":4875,"ZEMIDAPA":48000},
         "PU5": {"ESPOGEN":2394000,"EPOTIV":1523900,"EUVAX":38024,"ZEMIGLO":354000,"ZEMIMET":5250,"ZEMIDAPA":32000},
@@ -66,6 +104,28 @@ MONTHLY_TARGETS = {
         "DU3": {"ZEMIGLO":2655250,"ZEMIMET":90250,"ZEMIDAPA":210000},
         "DU4": {"ZEMIGLO":2337000,"ZEMIMET":33250,"ZEMIDAPA":210000},
     },
+    # ── Q4 2026 (Oct–Dec) — from Target workbook, updated 4 ต.ค. 2569 ──────────
+    "10": {
+        "PU4": {"ESPOGEN":1914827.67850868,"EPOTIV":103335.48945869,"EUVAX":50355,"ZEMIGLO":492000,"ZEMIMET":5200,"ZEMIDAPA":144000},
+        "PU5": {"ESPOGEN":3737155.78264233,"EPOTIV":420488.52439547,"EUVAX":48888,"ZEMIGLO":377600,"ZEMIMET":5600,"ZEMIDAPA":96000},
+        "PU6": {"ESPOGEN":1738009.72884957,"EPOTIV":93677.96707938,"EUVAX":21801.06,"ZEMIGLO":270400,"ZEMIMET":5200,"ZEMIDAPA":60000},
+        "DU3": {"ZEMIGLO":2236000,"ZEMIMET":76000,"ZEMIDAPA":180000},
+        "DU4": {"ZEMIGLO":1968000,"ZEMIMET":28000,"ZEMIDAPA":180000},
+    },
+    "11": {
+        "PU4": {"ESPOGEN":1914827.67850868,"EPOTIV":103335.48945869,"EUVAX":50355,"ZEMIGLO":553500,"ZEMIMET":5850,"ZEMIDAPA":180000},
+        "PU5": {"ESPOGEN":3737155.78264233,"EPOTIV":420488.52439547,"EUVAX":48888,"ZEMIGLO":424800,"ZEMIMET":6300,"ZEMIDAPA":120000},
+        "PU6": {"ESPOGEN":1738009.72884957,"EPOTIV":93677.96707938,"EUVAX":21801.06,"ZEMIGLO":304200,"ZEMIMET":5850,"ZEMIDAPA":75000},
+        "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":225000},
+        "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":225000},
+    },
+    "12": {
+        "PU4": {"ESPOGEN":1914827.67850868,"EPOTIV":103335.48945869,"EUVAX":50355,"ZEMIGLO":553500,"ZEMIMET":5850,"ZEMIDAPA":180000},
+        "PU5": {"ESPOGEN":3737155.78264233,"EPOTIV":420488.52439547,"EUVAX":48888,"ZEMIGLO":424800,"ZEMIMET":6300,"ZEMIDAPA":120000},
+        "PU6": {"ESPOGEN":1738009.72884957,"EPOTIV":93677.96707938,"EUVAX":21801.06,"ZEMIGLO":304200,"ZEMIMET":5850,"ZEMIDAPA":75000},
+        "DU3": {"ZEMIGLO":2515500,"ZEMIMET":85500,"ZEMIDAPA":225000},
+        "DU4": {"ZEMIGLO":2214000,"ZEMIMET":31500,"ZEMIDAPA":225000},
+    },
 }
 
 # ── Quarter → months mapping ───────────────────────────────────────────────
@@ -108,11 +168,12 @@ def build_scheme_def(tgt):
     ]
     return defs
 
-# ── Quarter scheme definition (cumulative over the quarter's months) ────────
-def build_quarter_scheme(months, prev_act_by_area=None):
-    """Build the quarter scheme. months = list of 'MM' in the quarter.
-    prev_act_by_area = {area: {scheme_name: actual}} cumulative for months already passed
-    (janFebAct = actual sales from earlier months in the SAME quarter)."""
+# ── Cumulative scheme over a period (quarter or full year) ───────────────────
+def build_period_scheme(months, prev_act_by_area=None):
+    """Build a cumulative scheme. months = list of 'MM' in the period
+    (a quarter, or all 12 months for the full year).
+    prev_act_by_area = {area: {scheme_name: actual}} for months of the period
+    already finished (stored as janFebAct; the dashboard adds the current MTD)."""
     prev_act_by_area = prev_act_by_area or {}
 
     def q_total(area, brands_or_none):
@@ -149,6 +210,81 @@ def build_quarter_scheme(months, prev_act_by_area=None):
         {"name":"TOTAL","brands":None,"tgt":sum(q_total(a,None) for a in pu_areas)+sum(q_total(a,["ZEMIGLO","ZEMIMET","ZEMIDAPA"]) for a in ["DU3","DU4"]),"janFebAct":prev.get("TOTAL",0)},
     ]
     return defs
+
+# ── Read the Target & Achievement workbook ───────────────────────────────────
+def load_target_workbook(path=TARGET_WORKBOOK):
+    """Read sheet 'Data Input' -> (actual, target, filled_months).
+    actual / target = {"MM": {area: {BRAND: value}}}.
+    filled_months = months whose ACTUAL column has at least one value entered."""
+    if not os.path.exists(path):
+        print(f"❌  ไม่พบไฟล์ Target: {os.path.normpath(path)}")
+        print("    ยอดสะสมไตรมาส/ทั้งปีต้องใช้ไฟล์นี้ — ตรวจว่า Google Drive sync แล้วลองใหม่")
+        sys.exit(1)
+    try:
+        wb   = openpyxl.load_workbook(path, data_only=True, read_only=True)
+        rows = list(wb["Data Input"].iter_rows(values_only=True))
+    except Exception as e:
+        print(f"❌  อ่านไฟล์ Target ไม่ได้ ({e}) — ปิดไฟล์ใน Excel แล้วลองใหม่")
+        sys.exit(1)
+
+    actual, target, filled = {}, {}, set()
+    section = "actual"                       # ACTUAL block comes first, then TARGET INPUT
+    for r in rows:
+        if not r:
+            continue
+        if isinstance(r[0], str) and r[0].strip().startswith("TARGET INPUT"):
+            section = "target"
+        area, product = str(r[0] or "").strip(), str(r[1] or "").strip()
+        if area not in AREAS or product not in PRODUCT_NAME:
+            continue
+        dst = actual if section == "actual" else target
+        for m in range(12):
+            mm, v = f"{m+1:02d}", r[2 + m]
+            dst.setdefault(mm, {}).setdefault(area, {})[PRODUCT_NAME[product]] = float(v or 0)
+            if section == "actual" and v is not None:
+                filled.add(mm)
+    if not actual or not target:
+        print("❌  โครงสร้าง sheet 'Data Input' เปลี่ยนไป — หาตาราง ACTUAL/TARGET ไม่เจอ")
+        sys.exit(1)
+    return actual, target, filled
+
+def sum_prev_actuals(actual, months):
+    """Cumulative actual over `months`, keyed by scheme name (same shape the
+    period scheme expects). MGR mirrors the target formulas: EPO = PU areas,
+    ZEMI = all areas, TOTAL = PU totals + DU ZEMI."""
+    EPO, ZEMI = ["ESPOGEN","EPOTIV"], ["ZEMIGLO","ZEMIMET","ZEMIDAPA"]
+    out = {}
+    for a in AREAS:
+        def s(brands=None):
+            return round(sum(v for mm in months for b, v in actual.get(mm, {}).get(a, {}).items()
+                             if brands is None or b in brands), 2)
+        out[a] = {"EPO Family": s(EPO), "ZEMI Family": s(ZEMI),
+                  "Zemidapa": s(["ZEMIDAPA"]), "TOTAL": s()}
+    out["MGR"] = {
+        "EPO Family":  sum(out[a]["EPO Family"] for a in PU_AREAS),
+        "ZEMI Family": sum(out[a]["ZEMI Family"] for a in AREAS),
+        "Zemidapa":    0,
+        "TOTAL":       sum(out[a]["TOTAL"] for a in PU_AREAS) + sum(out[a]["ZEMI Family"] for a in DU_AREAS),
+    }
+    return out
+
+def check_targets_match(wb_target, tol=1.0):
+    """Warn when MONTHLY_TARGETS has drifted from the workbook's TARGET table
+    (e.g. targets were revised in Excel but not copied into this file)."""
+    diffs = []
+    for mm, areas in MONTHLY_TARGETS.items():
+        for a, brands in areas.items():
+            wb_brands = wb_target.get(mm, {}).get(a, {})
+            for b in set(brands) | {k for k, v in wb_brands.items() if v}:
+                mine, theirs = brands.get(b, 0), wb_brands.get(b, 0)
+                if abs(mine - theirs) > tol:
+                    diffs.append(f"      {THAI_MONTHS[int(mm)]} {a} {b}: update.py {mine:,.0f}  ไฟล์ Target {theirs:,.0f}")
+    if diffs:
+        print(f"⚠️   target ใน update.py ไม่ตรงกับไฟล์ Target {len(diffs)} จุด (dashboard ยังใช้ค่าใน update.py):")
+        for line in diffs[:10]:
+            print(line)
+        if len(diffs) > 10:
+            print(f"      ... และอีก {len(diffs) - 10} จุด")
 
 # ── Sync JSX into index.html (single source of truth) ──────────────────────
 def sync_index_html(out_dir):
@@ -262,49 +398,11 @@ def main():
 
     scheme_def = build_scheme_def(tgt) if tgt else {}
 
-    # Cumulative actuals for months already completed EARLIER in the current quarter.
-    # janFebAct = actual sales of prior months in the SAME quarter (recovered from git history).
-    # Keyed by month "MM". First month of a quarter = {} (no prior actuals yet).
-    # Fill in Aug/Sep etc. at the start of each new month, same as we did for Q2.
-    QUARTER_PREV_ACT = {
-        # ── Q2 (Apr–Jun) ────────────────────────────────────────────────────
-        "04": {},  # April = first Q2 month
-        "05": {    # janFebAct = April actuals
-            "PU4": {"EPO Family":851460,  "ZEMI Family":653520,  "Zemidapa":122000, "TOTAL":1527380},
-            "PU5": {"EPO Family":6341850, "ZEMI Family":396704,  "Zemidapa":0,      "TOTAL":6763554},
-            "PU6": {"EPO Family":1579850, "ZEMI Family":627200,  "Zemidapa":0,      "TOTAL":2223350},
-            "DU3": {"EPO Family":0,       "ZEMI Family":1042356, "Zemidapa":165860, "TOTAL":1042356},
-            "DU4": {"EPO Family":0,       "ZEMI Family":2173920, "Zemidapa":42000,  "TOTAL":2173920},
-            "MGR": {"EPO Family":8773160, "ZEMI Family":4893700, "Zemidapa":0,      "TOTAL":13730560},
-        },
-        "06": {    # janFebAct = April + May actuals
-            "PU4": {"EPO Family":3378450,  "ZEMI Family":2075220, "Zemidapa":207900, "TOTAL":5514550},
-            "PU5": {"EPO Family":10814038, "ZEMI Family":1060416, "Zemidapa":0,      "TOTAL":12000654},
-            "PU6": {"EPO Family":3980350,  "ZEMI Family":722960,  "Zemidapa":0,      "TOTAL":4749570},
-            "DU3": {"EPO Family":0,        "ZEMI Family":3034612, "Zemidapa":265860, "TOTAL":3034612},
-            "DU4": {"EPO Family":0,        "ZEMI Family":5016620, "Zemidapa":56000,  "TOTAL":5016620},
-            "MGR": {"EPO Family":18172838, "ZEMI Family":11909828,"Zemidapa":0,      "TOTAL":30316006},
-        },
-        # ── Q3 (Jul–Sep) ────────────────────────────────────────────────────
-        "07": {},  # July = first Q3 month
-        "08": {    # janFebAct = July actuals (as of 30 ก.ค. 2569, last data before Aug — 225 rows)
-            "PU4": {"EPO Family":2427360, "ZEMI Family":930300,  "Zemidapa":132300, "TOTAL":3414660},
-            "PU5": {"EPO Family":5513840, "ZEMI Family":582400,  "Zemidapa":0,      "TOTAL":6145800},
-            "PU6": {"EPO Family":1862610, "ZEMI Family":159600,  "Zemidapa":0,      "TOTAL":2059250},
-            "DU3": {"EPO Family":0,       "ZEMI Family":2292500, "Zemidapa":21840,  "TOTAL":2292500},
-            "DU4": {"EPO Family":0,       "ZEMI Family":2094400, "Zemidapa":0,      "TOTAL":2094400},
-            "MGR": {"EPO Family":9803810, "ZEMI Family":6059200, "Zemidapa":0,      "TOTAL":16006610},
-        },
-        "09": {    # janFebAct = ยอด actual ก.ค.+ส.ค. จากไฟล์ Target and Achievement (sheet "Data Input")
-                   # ใช้ไฟล์แทน data.json เพราะ data.json ขาดยอดวันสิ้นเดือน (31 ก.ค. / 31 ส.ค.)
-            "PU4": {"EPO Family":4378190,    "ZEMI Family":1173060,  "Zemidapa":247380, "TOTAL":5618330},
-            "PU5": {"EPO Family":10807967.5, "ZEMI Family":1084552,  "Zemidapa":0,      "TOTAL":11971759.5},
-            "PU6": {"EPO Family":3150360,    "ZEMI Family":857640,   "Zemidapa":0,      "TOTAL":4056880},
-            "DU3": {"EPO Family":0,          "ZEMI Family":6492528,  "Zemidapa":954240, "TOTAL":6492528},
-            "DU4": {"EPO Family":0,          "ZEMI Family":5578300,  "Zemidapa":302400, "TOTAL":5578300},
-            "MGR": {"EPO Family":18336517.5, "ZEMI Family":15186080, "Zemidapa":0,      "TOTAL":33717797.5},
-        },
-    }
+    # Prior-month actuals come from the Target workbook (authoritative, and it
+    # includes customers the daily SD0002 leaves out). The current month is
+    # always the live MTD from SD0002, added on top by the dashboard.
+    wb_actual, wb_target, filled_months = load_target_workbook()
+    check_targets_match(wb_target)
 
     # Determine current quarter from the detected month
     quarter_name, quarter_months = quarter_of(month_str)
@@ -314,17 +412,32 @@ def main():
     else:
         quarter_label, quarter_period, quarter_months = "", "", []
 
-    # Safety net: this has been forgotten twice already (Aug, Sep) — if the
-    # current month isn't the first month of its quarter but has no explicit
-    # QUARTER_PREV_ACT entry, the quarter scheme silently undercounts (treats
-    # it as if no prior months happened). Warn loudly instead of failing silently.
-    is_first_month_of_quarter = bool(quarter_months) and month_str == quarter_months[0]
-    if quarter_months and not is_first_month_of_quarter and month_str not in QUARTER_PREV_ACT:
-        print(f"⚠️⚠️⚠️  QUARTER_PREV_ACT[\"{month_str}\"] ยังไม่ได้ใส่! Q3 Scheme การ์ดจะนับยอดผิด (ขาดเดือนก่อนหน้าในไตรมาสเดียวกัน)")
-        print(f"    ไปเพิ่มใน update.py — ดูยอดสะสมจาก data.json วันสุดท้ายของเดือนก่อน หรือ git log")
+    same_year = latest_date.year == TARGET_YEAR
+    if not same_year:
+        print(f"⚠️⚠️⚠️  ข้อมูลเป็นปี {latest_date.year} แต่ target/ไฟล์ Target เป็นปี {TARGET_YEAR}")
+        print("    ต้องอัพเดต MONTHLY_TARGETS, TARGET_YEAR และ TARGET_WORKBOOK สำหรับปีใหม่ — ยังไม่แสดงยอดสะสมไตรมาส/ทั้งปี")
+    prior_year_months    = [mm for mm in YEAR_MONTHS if mm < month_str] if same_year else []
+    prior_quarter_months = [mm for mm in quarter_months if mm < month_str] if same_year else []
 
-    prev_act       = QUARTER_PREV_ACT.get(month_str, {})
-    quarter_scheme = build_quarter_scheme(quarter_months, prev_act_by_area=prev_act) if quarter_months else {}
+    # Safety net: a finished month with no ACTUAL typed into the workbook would
+    # silently drop out of the cumulative numbers — say so loudly instead.
+    missing = [mm for mm in prior_year_months if mm not in filled_months]
+    if missing:
+        names = ", ".join(THAI_MONTHS[int(mm)] for mm in missing)
+        print(f"⚠️⚠️⚠️  ไฟล์ Target ยังไม่ได้กรอก ACTUAL เดือน {names} — ยอดสะสมไตรมาส/ทั้งปีจะขาดเดือนนี้")
+    missing_tgt = [mm for mm in YEAR_MONTHS if mm not in MONTHLY_TARGETS]
+    if same_year and missing_tgt:
+        names = ", ".join(THAI_MONTHS[int(mm)] for mm in missing_tgt)
+        print(f"⚠️   ไม่มี target เดือน {names} ใน MONTHLY_TARGETS — เป้าทั้งปีจะต่ำกว่าจริง")
+
+    quarter_scheme = (build_period_scheme(quarter_months, sum_prev_actuals(wb_actual, prior_quarter_months))
+                      if quarter_months and same_year else {})
+    year_scheme    = (build_period_scheme(YEAR_MONTHS, sum_prev_actuals(wb_actual, prior_year_months))
+                      if same_year else {})
+    year_label       = str(thai_year)
+    year_prev_period = (f"{THAI_MONTHS[1]}–{THAI_MONTHS[int(prior_year_months[-1])]}"
+                        if len(prior_year_months) > 1 else
+                        THAI_MONTHS[1] if prior_year_months else "")
 
     # Build output
     data = {
@@ -336,6 +449,9 @@ def main():
         "quarterScheme": quarter_scheme,
         "quarterLabel":  quarter_label,   # e.g. "Q3"
         "quarterPeriod": quarter_period,  # e.g. "ก.ค.–ก.ย."
+        "yearScheme":     year_scheme,
+        "yearLabel":      year_label,        # e.g. "2569"
+        "yearPrevPeriod": year_prev_period,  # months already summed from the workbook, e.g. "ม.ค.–ก.ย."
     }
 
     # Write data.json next to this script
@@ -362,6 +478,9 @@ def main():
     print(f"   📊  เดือน        : {mtd_label}")
     if quarter_label:
         print(f"   📈  ไตรมาส       : {quarter_label} ({quarter_period})")
+    if year_scheme:
+        src = f"สะสม {year_prev_period} จากไฟล์ Target + {mtd_label} จาก SD0002" if year_prev_period else f"{mtd_label} จาก SD0002"
+        print(f"   📆  ทั้งปี        : {year_label} ({src})")
     print(f"   📋  จำนวนรายการ  : {len(entries)} รายการ")
     print(f"   💾  บันทึกไปที่  : {out_path}")
     print(f"\n   ถ้าใช้ GitHub Pages: git add data.json && git commit -m 'data: {data_date}' && git push")

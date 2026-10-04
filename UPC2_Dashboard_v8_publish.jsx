@@ -46,7 +46,7 @@ function Login({onLogin,dataDate}){
   );
 }
 
-function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,quarterScheme,quarterLabel,quarterPeriod}){
+function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,quarterScheme,quarterLabel,quarterPeriod,yearScheme,yearLabel,yearPrevPeriod}){
   const isMgr=area==="MGR";
   const curMonth=(mtdLabel||"").split(" ")[0];
   const filterAreas=isMgr?["PU4","PU5","PU6","DU3","DU4"]:[area];
@@ -64,7 +64,10 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,quarterSche
   const brandMTD=brandSum.find(b=>b.b===activeBrand)?.v||0;
   const brandTgt=targets[activeBrand]||0;
   const schemes=useMemo(()=>{const defs=schemeDef[isMgr?"MGR":area]||[];return defs.map(s=>{let act=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))act+=r.v;});}else act=totalMTD;return{...s,act,pct:s.tgt>0?(act/s.tgt)*100:0};});},[area,data,totalMTD,isMgr,schemeDef]);
-  const q1Schemes=useMemo(()=>{const defs=(quarterScheme||{})[isMgr?"MGR":area]||[];return defs.map(s=>{let marAct=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=totalMTD;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});},[area,data,totalMTD,isMgr,quarterScheme]);
+  // Cumulative schemes (quarter / full year): act = finished months (janFebAct, from the Target workbook) + this month's MTD
+  const cumulate=defs=>defs.map(s=>{let marAct=0;if(s.brands){data.forEach(r=>{if(s.brands.includes(r.b))marAct+=r.v;});}else marAct=totalMTD;const totalAct=s.janFebAct+marAct;return{...s,act:totalAct,marAct,pct:s.tgt>0?(totalAct/s.tgt)*100:0};});
+  const q1Schemes=useMemo(()=>cumulate((quarterScheme||{})[isMgr?"MGR":area]||[]),[area,data,totalMTD,isMgr,quarterScheme]);
+  const yearSchemes=useMemo(()=>cumulate((yearScheme||{})[isMgr?"MGR":area]||[]),[area,data,totalMTD,isMgr,yearScheme]);
   const areaBreak=useMemo(()=>{if(!isMgr)return null;return["PU4","PU5","PU6","DU3","DU4"].map(a=>{const act=(rawData||[]).filter(r=>r.a===a).reduce((s,r)=>s+r.v,0);const areaTgt=Object.values(tgt[a]||{}).reduce((s,t)=>s+t,0);return{area:a,act,tgt:areaTgt,pct:areaTgt>0?(act/areaTgt)*100:0};});},[isMgr,rawData,tgt]);
 
   const downloadCSV=useCallback(()=>{let csv="\uFEFFวันที่,Area,ลูกค้า,แบรนด์,จำนวน,ยอดขาย\n";data.forEach(r=>csv+=`${r.d},${r.a},"${r.c}",${r.b},${r.q},${r.v}\n`);const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`SD0002_${area}_MTD.csv`;a.click();URL.revokeObjectURL(url);},[data,area]);
@@ -98,6 +101,10 @@ function Dash({area,onLogout,rawData,dataDate,mtdLabel,tgt,schemeDef,quarterSche
       {q1Schemes.length>0&&(<div style={card}><div style={sec}>📊 {quarterLabel} Incentive Scheme ({quarterPeriod})</div>
         <div style={{display:"grid",gridTemplateColumns:q1Schemes.length<=2?"1fr 1fr":`repeat(${Math.min(q1Schemes.length,3)},1fr)`,gap:8}}>
           {q1Schemes.map((s,i)=>(<div key={i} style={{background:"#faf5ff",borderRadius:12,padding:10,textAlign:"center",border:"1px solid #ede9fe"}}><div style={{fontSize:10,fontWeight:700,color:"#7c3aed",marginBottom:2,lineHeight:1.2}}>{s.name}</div><Mini pct={s.pct} size={78}/><div style={{fontSize:11,fontWeight:700,color:"#1e293b"}}>{fmt(s.act)}</div><div style={{fontSize:9,color:"#94a3b8"}}>เป้า {quarterLabel} {fmt(s.tgt)}</div><div style={{fontSize:8,color:"#a78bfa",marginTop:2}}>{curMonth} {fmt(s.marAct)}</div></div>))}</div></div>)}
+
+      {yearSchemes.length>0&&(<div style={card}><div style={sec}>🏆 Total Year Achievement ({yearLabel})</div>
+        <div style={{display:"grid",gridTemplateColumns:yearSchemes.length<=2?"1fr 1fr":`repeat(${Math.min(yearSchemes.length,3)},1fr)`,gap:8}}>
+          {yearSchemes.map((s,i)=>(<div key={i} style={{background:"#f0fdfa",borderRadius:12,padding:10,textAlign:"center",border:"1px solid #ccfbf1"}}><div style={{fontSize:10,fontWeight:700,color:"#0f766e",marginBottom:2,lineHeight:1.2}}>{s.name}</div><Mini pct={s.pct} size={78}/><div style={{fontSize:11,fontWeight:700,color:"#1e293b"}}>{fmt(s.act)}</div><div style={{fontSize:9,color:"#94a3b8"}}>เป้าปี {fmt(s.tgt)}</div>{yearPrevPeriod&&<div style={{fontSize:8,color:"#14b8a6",marginTop:2}}>{yearPrevPeriod} {fmt(s.janFebAct)}</div>}<div style={{fontSize:8,color:"#14b8a6"}}>{curMonth} {fmt(s.marAct)}</div></div>))}</div></div>)}
 
       {isMgr&&areaBreak&&(<div style={card}><div style={sec}>📍 แยกตาม Area — กดเพื่อดู Scheme</div>
         {areaBreak.map((a,i)=>{const col=pctCol(a.pct);const isOpen=expandArea===a.area;const areaSchemes=isOpen?calcScheme(a.area,rawData||[],schemeDef||{}):[];const areaQ1=isOpen?calcQuarterScheme(a.area,rawData||[],quarterScheme||{}):[];
@@ -152,7 +159,7 @@ function App(){
     </div>);
 
   if(!area) return <Login onLogin={setArea} dataDate={appData.dataDate}/>;
-  return <Dash area={area} onLogout={()=>setArea(null)} rawData={appData.raw} dataDate={appData.dataDate} mtdLabel={appData.mtdLabel} tgt={appData.tgt} schemeDef={appData.schemeDef} quarterScheme={appData.quarterScheme} quarterLabel={appData.quarterLabel} quarterPeriod={appData.quarterPeriod}/>;
+  return <Dash area={area} onLogout={()=>setArea(null)} rawData={appData.raw} dataDate={appData.dataDate} mtdLabel={appData.mtdLabel} tgt={appData.tgt} schemeDef={appData.schemeDef} quarterScheme={appData.quarterScheme} yearScheme={appData.yearScheme} yearLabel={appData.yearLabel} yearPrevPeriod={appData.yearPrevPeriod} quarterLabel={appData.quarterLabel} quarterPeriod={appData.quarterPeriod}/>;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

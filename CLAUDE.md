@@ -108,7 +108,20 @@ Target มาจาก Excel: `Target and Achievement UPC2 Team 2026.xlsx` → s
 - **ZEMI Family** = ZEMIGLO + ZEMIMET + ZEMIDAPA (ต้องครบ 3 ตัว!)
 - **TOTAL** = ทุกแบรนด์รวมกัน
 
-Q2 Scheme = Apr + May + Jun รวมกัน (janFebAct = ยอดสะสมก่อนเดือนปัจจุบันใน Q2)
+### การ์ดสะสม: ไตรมาส และ Total Year (logic เดียวกัน)
+- **ยอด** = เดือนที่จบแล้ว (`janFebAct`) + MTD เดือนปัจจุบันจาก SD0002
+- **เดือนที่จบแล้ว** อ่านจากไฟล์ Target (sheet "Data Input" ตาราง ACTUAL) **อัตโนมัติทุกครั้งที่รัน update.py**
+  - ไตรมาส: เดือนก่อนหน้าในไตรมาสเดียวกัน (เดือนแรกของไตรมาส = 0)
+  - ทั้งปี: ม.ค. → เดือนก่อนหน้า
+- **เป้า** = ผลรวม `MONTHLY_TARGETS` ทุกเดือนในช่วงนั้น (ไตรมาส 3 เดือน / ทั้งปี 12 เดือน — ไม่ prorate)
+- MGR: EPO = PU4–6, ZEMI = ทุก area, TOTAL = PU รวมทุกแบรนด์ + DU เฉพาะ ZEMI (ตรงกับสูตรเป้า)
+- ตรวจแล้ว 4 ต.ค. 2569: ACTUAL ม.ค.–ก.ย. ในไฟล์ Target รวม 138,617,860 = ไฟล์ Bill Control (138,617,862)
+
+### คำเตือนที่ update.py จะพิมพ์ (ห้ามมองข้าม)
+- `⚠️⚠️⚠️ ไฟล์ Target ยังไม่ได้กรอก ACTUAL เดือน …` → ผู้ใช้ต้องกรอก actual เดือนที่จบแล้วในไฟล์ Target ก่อน ไม่งั้นยอดสะสมขาดเดือนนั้น
+- `⚠️ target ใน update.py ไม่ตรงกับไฟล์ Target …` → มีคนแก้ target ใน Excel แต่ยังไม่ได้ copy มาใส่ `MONTHLY_TARGETS`
+- `⚠️⚠️⚠️ ข้อมูลเป็นปี … แต่ target เป็นปี 2026` → ขึ้นปีใหม่แล้ว ต้องอัพเดต `TARGET_YEAR`, `TARGET_WORKBOOK`, `MONTHLY_TARGETS`
+- `❌ ไม่พบไฟล์ Target` / `อ่านไฟล์ Target ไม่ได้` → update.py หยุด ไม่เขียน data.json (กันตัวเลขผิด) — เช็ค Google Drive sync / ปิดไฟล์ใน Excel
 
 ---
 
@@ -154,21 +167,17 @@ git add data.json && git commit -m "data: DD Mon" && git push
 **ตอนนี้ JSX ไม่ต้องแก้แล้ว** — label เดือน/ไตรมาสทั้งหมดดึงจาก data.json อัตโนมัติ
 (เดือนจาก `mtdLabel`, ไตรมาสจาก `quarterLabel`/`quarterPeriod`) ทุกอย่างอยู่ใน `update.py`
 
-### ต้นเดือน (ระหว่างไตรมาส เช่น ขึ้น ส.ค. หรือ ก.ย.)
-แก้ `update.py` → `QUARTER_PREV_ACT` เท่านั้น:
-- เพิ่ม key เดือนใหม่ = ยอด **actual สะสม** ของเดือนก่อนๆ ในไตรมาสเดียวกัน
-  (เช่น ขึ้น ส.ค. → ใส่ `"08"` = ยอด actual ก.ค.; ขึ้น ก.ย. → ใส่ `"09"` = ก.ค.+ส.ค.)
-- ดูยอด actual สะสมได้จาก data.json วันสุดท้ายของเดือนก่อน หรือ git log
-- แต่ละ area ใส่ `{"EPO Family":…, "ZEMI Family":…, "Zemidapa":…, "TOTAL":…}` + `MGR` = ผลรวม
-- เดือนแรกของไตรมาส (04/07/10) = `{}` (ไม่มี actual ก่อนหน้า)
+### ต้นเดือน — ไม่ต้องแก้โค้ดแล้ว
+`QUARTER_PREV_ACT` (ที่เคยต้องพิมพ์มือทุกต้นเดือน และเคยลืม 2 ครั้ง) **ถูกลบออกแล้ว** — ยอดเดือนที่จบแล้ว
+อ่านจากไฟล์ Target อัตโนมัติ สิ่งเดียวที่ต้องทำคือ **ผู้ใช้กรอก ACTUAL เดือนที่จบแล้วในไฟล์ Target**
+(ถ้ายังไม่กรอก update.py จะเตือน `⚠️⚠️⚠️`)
 
-### ต้นไตรมาสใหม่ (เช่น ขึ้น Q4 = ต.ค.)
-1. เพิ่ม target 3 เดือนใหม่ใน `MONTHLY_TARGETS` (เช่น `"10"`,`"11"`,`"12"`) จากไฟล์ target CSV
-2. เพิ่ม key เดือนแรกของไตรมาส `"10": {}` ใน `QUARTER_PREV_ACT`
-3. `QUARTERS` dict มี Q1–Q4 ครบแล้ว — ระบบ detect ไตรมาสเองจากวันที่ในไฟล์ Excel
-
-ดึง target จาก: `Target and Achievement UPC2 Team 2026.xlsx` (sheet "Data Input")
-หรือไฟล์ CSV ที่ผู้ใช้ส่งมา (คอลัมน์ Jan–Sep = ตรงกับเดือน)
+### เมื่อ target เปลี่ยน / ขึ้นปีใหม่
+- target ทั้ง 12 เดือนของ 2569 อยู่ใน `MONTHLY_TARGETS` ครบแล้ว (ใส่ Q1 + Q4 เมื่อ 4 ต.ค. 2569)
+- ถ้าผู้ใช้แก้ target ใน Excel → update.py จะเตือนว่าไม่ตรง → copy ค่าจากไฟล์มาใส่ `MONTHLY_TARGETS`
+  (สร้างจากไฟล์ด้วย script อย่าพิมพ์มือ; ให้ผู้ใช้ยืนยันก่อนแก้ target ทุกครั้ง)
+- ขึ้นปี 2570: เปลี่ยน `TARGET_YEAR`, `TARGET_WORKBOOK` (ชื่อไฟล์ปีใหม่) และ `MONTHLY_TARGETS` ทั้ง 12 เดือน
+  (`MONTHLY_TARGETS` ใช้ key แค่ "MM" ไม่มีปี — ถ้าไม่แก้ ม.ค. 2570 จะใช้เป้า ม.ค. 2569)
 
 ---
 
@@ -190,22 +199,22 @@ git add data.json && git commit -m "data: DD Mon" && git push
 
 - Sheet "Data Input" แถว 5–28 = **ACTUAL** รายเดือน, แถว 40–63 = **TARGET** รายเดือน
   (คอลัมน์ C=Jan … N=Dec ตรงกับเดือน)
-- ยอด actual ในไฟล์นี้ **ครบกว่า data.json** เพราะ data.json ขาดยอดวันสิ้นเดือน
-  → เวลาจะเติม `QUARTER_PREV_ACT` ให้ดึงจากไฟล์นี้ ไม่ใช่จาก data.json
+- ยอด actual ในไฟล์นี้ **ครบกว่า data.json** เพราะ SD0002 รายวันไม่มี 2 ลูกค้า (ดูหัวข้อข้อจำกัดด้านบน)
+  → update.py อ่าน ACTUAL จากไฟล์นี้ตรงๆ (`load_target_workbook()` — หาตารางจาก
+  ข้อความ "TARGET INPUT" ไม่ผูกกับเลขแถว)
 - Sheet "Ref. Target": อ้างอิง
 
 ---
 
 ## สถานะปัจจุบัน
 
-- **เดือน:** กันยายน 2569 (เดือนสุดท้ายของ Q3)
+- **เดือน:** ตุลาคม 2569 (Q4 เริ่มแล้ว)
 - **Dashboard version:** v8 (publish)
-- **ข้อมูลล่าสุด:** 2 ก.ย. 2569 (24 รายการ)
 - **GitHub Pages:** deploy แล้ว → https://makenew-world.github.io/upc2-dashboard/
-- **Q3 (ก.ค.–ก.ย.):** target ใส่ครบ (ก.ย. ปรับ EPOTIV/ESPOGEN แล้ว), `QUARTER_PREV_ACT["09"]` ใช้ actual ก.ค.+ส.ค. จากไฟล์ Target
-- **⚠️ Q4 ยังไม่พร้อม:** ไฟล์ Target กรอก ต.ค.–ธ.ค. ไว้แค่ EPOTIV/ESPOGEN — EUVAX/ZEMIGLO/ZEMIMET/ZEMIDAPA ยังว่าง ต้องให้ผู้ใช้กรอกครบก่อนขึ้นเดือน ต.ค.
-- **หมายเหตุ:** ต้นเดือน ต.ค. จะขึ้น Q4 ใหม่ — ต้องเพิ่ม target Q4 ใน `MONTHLY_TARGETS` (ดู "วิธีอัพเดต Target" ด้านบน หัวข้อ "ต้นไตรมาสใหม่")
-  และตั้ง `QUARTER_PREV_ACT["10"] = {}` (เดือนแรกของไตรมาสใหม่ ไม่มี actual ก่อนหน้า)
+- **target:** ครบทั้ง 12 เดือนของ 2569 (Q4 ใส่แล้ว 4 ต.ค. 2569 จากไฟล์ Target)
+- **ยอดสะสม:** ไตรมาส + Total Year อ่าน ACTUAL เดือนที่จบแล้วจากไฟล์ Target อัตโนมัติ (ไม่มี `QUARTER_PREV_ACT` แล้ว)
+- **ข้อมูลล่าสุดที่ deploy (4 ต.ค. 2569):** ยังเป็น 29 ก.ย. (Q3) — ยังไม่มี SD0002 ของ ต.ค.
+- **ต้นเดือน พ.ย.:** ผู้ใช้ต้องกรอก ACTUAL ต.ค. ในไฟล์ Target (ไม่งั้น update.py เตือน และ Q4/ทั้งปีจะขาด ต.ค.)
 
 ---
 
@@ -230,3 +239,6 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Sep | Fix: ลืมใส่ `QUARTER_PREV_ACT["09"]` ตอนขึ้นเดือน ก.ย. — Q3 Scheme เคยนับแค่ยอด ก.ย. ไม่รวม ก.ค.+ส.ค. |
 | Sep | ปรับ target ก.ย. ของ EPOTIV/ESPOGEN (PU4/PU5/PU6) ตามไฟล์ Target ใหม่ — เป้า EPO Family ลด 1,180,031 |
 | Sep | เปลี่ยน `QUARTER_PREV_ACT["09"]` ไปใช้ actual ก.ค.+ส.ค. จากไฟล์ Target (ครบกว่า data.json +158,060) |
+| Oct | ใส่ target Q4 (ต.ค.–ธ.ค.) + Q1 (ม.ค.–มี.ค. ใช้คิดเป้าทั้งปี) จากไฟล์ Target |
+| Oct | เพิ่มการ์ด **Total Year Achievement** ใต้การ์ดไตรมาส (`yearScheme`/`yearLabel`/`yearPrevPeriod` ใน data.json) |
+| Oct | ลบ `QUARTER_PREV_ACT` — ยอดเดือนที่จบแล้วอ่านจากไฟล์ Target อัตโนมัติ + เตือนเมื่อ ACTUAL ไม่ได้กรอก / target ไม่ตรงไฟล์ |
