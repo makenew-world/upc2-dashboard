@@ -212,20 +212,51 @@ def build_period_scheme(months, prev_act_by_area=None):
     return defs
 
 # ── Read the Target & Achievement workbook ───────────────────────────────────
+# Every successful read is also saved here, so a day when the workbook can't
+# be opened (Drive not synced, file locked) still updates using the last copy.
+ACTUALS_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "actuals_cache.json")
+
 def load_target_workbook(path=TARGET_WORKBOOK):
-    """Read sheet 'Data Input' -> (actual, target, filled_months).
+    """-> (actual, target, filled_months, source_label).
     actual / target = {"MM": {area: {BRAND: value}}}.
-    filled_months = months whose ACTUAL column has at least one value entered."""
+    filled_months = months whose ACTUAL column has at least one value entered.
+    Reads the workbook; on success refreshes ACTUALS_CACHE, on failure falls
+    back to ACTUALS_CACHE (and stops only if there is no cache either)."""
+    try:
+        actual, target, filled = _read_workbook(path)
+    except RuntimeError as e:
+        if not os.path.exists(ACTUALS_CACHE):
+            print(f"❌  {e}")
+            print("    และยังไม่มียอดสำรอง — ตรวจว่า Google Drive sync แล้ว / ปิดไฟล์ใน Excel แล้วลองใหม่")
+            sys.exit(1)
+        with open(ACTUALS_CACHE, encoding="utf-8") as f:
+            cache = json.load(f)
+        filled = set(cache["filled"])
+        last = THAI_MONTHS[int(max(filled))] if filled else "-"
+        print(f"⚠️   {e}")
+        print(f"    → ใช้ยอดสำรองที่บันทึกไว้เมื่อ {cache['saved_at']} (มี ACTUAL ถึงเดือน {last}) อัพเดตต่อได้ตามปกติ")
+        return cache["actual"], cache["target"], filled, f"ยอดสำรอง ({cache['saved_at']})"
+
+    cache = {"actual": actual, "target": target, "filled": sorted(filled)}
+    old = None
+    if os.path.exists(ACTUALS_CACHE):
+        with open(ACTUALS_CACHE, encoding="utf-8") as f:
+            old = json.load(f)
+    if old is None or {k: old.get(k) for k in cache} != cache:   # rewrite only when the numbers changed
+        cache["saved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        with open(ACTUALS_CACHE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, separators=(",", ":"))
+    return actual, target, filled, "ไฟล์ Target"
+
+def _read_workbook(path):
+    """Parse sheet 'Data Input' -> (actual, target, filled). Raises RuntimeError."""
     if not os.path.exists(path):
-        print(f"❌  ไม่พบไฟล์ Target: {os.path.normpath(path)}")
-        print("    ยอดสะสมไตรมาส/ทั้งปีต้องใช้ไฟล์นี้ — ตรวจว่า Google Drive sync แล้วลองใหม่")
-        sys.exit(1)
+        raise RuntimeError(f"ไม่พบไฟล์ Target: {os.path.normpath(path)}")
     try:
         wb   = openpyxl.load_workbook(path, data_only=True, read_only=True)
         rows = list(wb["Data Input"].iter_rows(values_only=True))
     except Exception as e:
-        print(f"❌  อ่านไฟล์ Target ไม่ได้ ({e}) — ปิดไฟล์ใน Excel แล้วลองใหม่")
-        sys.exit(1)
+        raise RuntimeError(f"อ่านไฟล์ Target ไม่ได้ ({e})")
 
     actual, target, filled = {}, {}, set()
     section = "actual"                       # ACTUAL block comes first, then TARGET INPUT
@@ -244,8 +275,7 @@ def load_target_workbook(path=TARGET_WORKBOOK):
             if section == "actual" and v is not None:
                 filled.add(mm)
     if not actual or not target:
-        print("❌  โครงสร้าง sheet 'Data Input' เปลี่ยนไป — หาตาราง ACTUAL/TARGET ไม่เจอ")
-        sys.exit(1)
+        raise RuntimeError("โครงสร้าง sheet 'Data Input' ในไฟล์ Target เปลี่ยนไป — หาตาราง ACTUAL/TARGET ไม่เจอ")
     return actual, target, filled
 
 def sum_prev_actuals(actual, months):
@@ -401,7 +431,7 @@ def main():
     # Prior-month actuals come from the Target workbook (authoritative, and it
     # includes customers the daily SD0002 leaves out). The current month is
     # always the live MTD from SD0002, added on top by the dashboard.
-    wb_actual, wb_target, filled_months = load_target_workbook()
+    wb_actual, wb_target, filled_months, actual_source = load_target_workbook()
     check_targets_match(wb_target)
 
     # Determine current quarter from the detected month
@@ -479,7 +509,7 @@ def main():
     if quarter_label:
         print(f"   📈  ไตรมาส       : {quarter_label} ({quarter_period})")
     if year_scheme:
-        src = f"สะสม {year_prev_period} จากไฟล์ Target + {mtd_label} จาก SD0002" if year_prev_period else f"{mtd_label} จาก SD0002"
+        src = f"สะสม {year_prev_period} จาก{actual_source} + {mtd_label} จาก SD0002" if year_prev_period else f"{mtd_label} จาก SD0002"
         print(f"   📆  ทั้งปี        : {year_label} ({src})")
     print(f"   📋  จำนวนรายการ  : {len(entries)} รายการ")
     print(f"   💾  บันทึกไปที่  : {out_path}")

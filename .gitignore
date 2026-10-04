@@ -1,0 +1,3 @@
+# Local fallback copy of the Target workbook's ACTUAL/TARGET tables (written by update.py)
+actuals_cache.json
+__pycache__/
