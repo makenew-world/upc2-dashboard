@@ -371,6 +371,22 @@ def parse_excel(path):
         print("❌  Raw Data ว่างเปล่า")
         sys.exit(1)
 
+    # Check the columns we read by fixed position still hold what we expect.
+    hdr = [str(h or "").strip() for h in rows[0]]
+    expected = {1: "billing date", 2: "sales area", 4: "customer name", 5: "brand name",
+                8: "net sales qty", 10: "net sales amount", 40: "borrow amount"}
+    moved = [f"{i}: '{hdr[i] if i < len(hdr) else '(ไม่มี)'}' (ควรเป็น {name})"
+             for i, name in expected.items() if i >= len(hdr) or not hdr[i].lower().startswith(name)]
+    if moved:
+        print("❌  คอลัมน์ในไฟล์ SD0002 เปลี่ยนตำแหน่ง — ยังไม่อัพเดต (ตรวจไฟล์ก่อน):")
+        for m in moved:
+            print(f"      คอลัมน์ {m}")
+        sys.exit(1)
+    # DKSH changed column K in Oct 2026 from "Net Sales Amount (Excl.DrCr Memo…)"
+    # to "Net Sales Amount - Borrow Amount". Subtract Borrow Amount only when
+    # column K doesn't already exclude it — otherwise borrow lines go negative.
+    k_is_net_of_borrow = "borrow" in hdr[10].lower()
+
     entries = []
     latest_date = None
     detected_month = None
@@ -384,7 +400,7 @@ def parse_excel(path):
         brand    = row[5]
         qty      = int(row[8] or 0)
         amount   = float(row[10] or 0)
-        borrow   = float(row[40] or 0)
+        borrow   = 0 if k_is_net_of_borrow else float(row[40] or 0)
         value    = amount - borrow
         if value == 0:
             continue

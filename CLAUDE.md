@@ -196,9 +196,13 @@ git add data.json && git commit -m "data: DD Mon" && git push
 - Column E (index 4): Customer Name (EN)
 - Column F (index 5): Brand Name
 - Column I (index 8): Net Sales Qty
-- Column K (index 10): Net Sales Amount
+- Column K (index 10): ยอดขาย — **ชื่อคอลัมน์เปลี่ยนเมื่อ ต.ค. 2569** (ดูข้างล่าง)
 - Column AO (index 40): Borrow Amount
 - **ยอดขาย = Net Sales Amount − Borrow Amount** (กรอง row ที่ value = 0 ออก)
+  - ถึง ก.ย. 2569: K = `Net Sales Amount (Excl.DrCr Memo in Overall Doc)` → update.py หัก AO เอง
+  - ตั้งแต่ ต.ค. 2569: K = `Net Sales Amount - Borrow Amount` (DKSH หักให้แล้ว) → **ห้ามหัก AO ซ้ำ**
+    (เคยหักซ้ำ: แถว borrow/consignment fill-up ติดลบ เช่น MAHASARAKRAM DU3 ZEMIGLO 15 ต.ค. −399,000)
+  - update.py ดูจากชื่อหัวคอลัมน์ K เองอัตโนมัติ และหยุดถ้าคอลัมน์ที่ใช้ (1,2,4,5,8,10,40) ย้ายตำแหน่ง
 
 ### Target and Achievement UPC2 Team 2026.xlsx  ★ แหล่งอ้างอิงหลักของ target/actual
 **path จริงที่ใช้:** `LG Chem/01 Sale Update/Achievement/Target and Achievement UPC2 Team 2026.xlsx`
@@ -249,3 +253,4 @@ git add data.json && git commit -m "data: DD Mon" && git push
 | Oct | ใส่ target Q4 (ต.ค.–ธ.ค.) + Q1 (ม.ค.–มี.ค. ใช้คิดเป้าทั้งปี) จากไฟล์ Target |
 | Oct | เพิ่มการ์ด **Total Year Achievement** ใต้การ์ดไตรมาส (`yearScheme`/`yearLabel`/`yearPrevPeriod` ใน data.json) |
 | Oct | ลบ `QUARTER_PREV_ACT` — ยอดเดือนที่จบแล้วอ่านจากไฟล์ Target อัตโนมัติ + เตือนเมื่อ ACTUAL ไม่ได้กรอก / target ไม่ตรงไฟล์ |
+| Oct | Fix: SD0002 คอลัมน์ K เปลี่ยนเป็น "Net Sales Amount - Borrow Amount" → update.py หัก borrow ซ้ำ แถว borrow ติดลบ (DU3 ต่ำไป 399,000) — ตอนนี้เลือกสูตรจากชื่อหัวคอลัมน์ + ตรวจตำแหน่งคอลัมน์ |
